@@ -1,0 +1,11 @@
+{
+  "name": "benhvienphutho-skills",
+  "version": "1.0.0",
+  "description": "Hospital document skills for BVĐK tỉnh Phú Thọ — HCQT, Điều dưỡng, setup, and grilling reference.",
+  "skills": [
+    "phong-hcqt",
+    "phong-dieu-duong",
+    "setup",
+    "grilling"
+  ]
+}
