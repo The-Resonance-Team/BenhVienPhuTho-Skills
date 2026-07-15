@@ -20,7 +20,7 @@ Skill theo phòng **HCQT**. Đầu ra giấy tờ hành chính là file `.docx` 
 
 **Trước khi merge:** đảm bảo đã chạy skill **`setup`** (kiểm tra/cài `officecli`).
 
-Nguồn dữ liệu gốc: mã gói `thau-50-500`, `thau-duoi-50`, `hcqt-quy-trinh`, `phan-cong-hcqt` dưới `{TAI_LIEU_BV}` — xem [`../../DATA-MAP.md`](../../DATA-MAP.md). Không hardcode đường dẫn máy.
+Nguồn dữ liệu gốc: mã gói `thau-50-500`, `thau-duoi-50`, `hcqt-quy-trinh`, `phan-cong-hcqt` dưới `{TAI_LIEU_BV}`. Không hardcode đường dẫn máy.
 
 ## Điều kiện tiên quyết / setup
 

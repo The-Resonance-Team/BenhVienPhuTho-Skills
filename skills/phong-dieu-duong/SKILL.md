@@ -17,7 +17,7 @@ Skill theo phòng **Điều dưỡng**. Giấy tờ chính thức = `.docx` sinh
 
 **Trước khi merge:** đảm bảo đã chạy skill **`setup`** (kiểm tra/cài `officecli`).
 
-Nguồn: gói `dieu-duong` dưới `{TAI_LIEU_BV}` — xem `references/dieu-duong-index.md` và [`../../DATA-MAP.md`](../../DATA-MAP.md).
+Nguồn: gói `dieu-duong` dưới `{TAI_LIEU_BV}` — xem `references/dieu-duong-index.md`.
 
 ## Điều kiện tiên quyết / setup
 
