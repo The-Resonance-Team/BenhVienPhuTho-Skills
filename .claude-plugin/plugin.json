@@ -1,12 +1,13 @@
 {
   "name": "benhvienphutho-skills",
   "version": "1.0.0",
-  "description": "Hospital document skills for BVĐK tỉnh Phú Thọ — HCQT, Điều dưỡng, QLCL, CNTT, officecli, setup, and grilling reference.",
+  "description": "Hospital document skills for BVĐK tỉnh Phú Thọ — HCQT, Điều dưỡng, QLCL, CNTT, KTDA, officecli, setup, and grilling reference.",
   "skills": [
     "phong-hcqt",
     "phong-dieu-duong",
     "phong-qlcl",
     "phong-cntt",
+    "phong-ktda",
     "officecli",
     "setup",
     "grilling"
