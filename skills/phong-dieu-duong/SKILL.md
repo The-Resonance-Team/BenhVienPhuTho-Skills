@@ -1,12 +1,6 @@
 ---
 name: phong-dieu-duong
-description: >
-  Skill Phòng Điều dưỡng (BVĐK tỉnh Phú Thọ): kế hoạch/QĐ tổ chức thi tay nghề ĐD-KTV,
-  thông báo sinh hoạt khoa học, công văn điều dưỡng, phân công ban chỉ đạo/ban đề thi/giám khảo.
-  Dùng ngay khi user nhắc điều dưỡng, thi tay nghề, KTV, Hội đồng người bệnh, SHKH điều dưỡng,
-  hoặc soạn giấy tờ Phòng Điều dưỡng. Xuất file bằng `officecli merge` trên template có sẵn
-  trong `assets/` — KHÔNG soạn Markdown làm bố cục, KHÔNG `officecli new --prompt`.
-  Không dùng cho mua sắm/LCNT HCQT (phong-hcqt) hay thanh toán BHYT.
+description: "Skill Phòng Điều dưỡng (BVĐK tỉnh Phú Thọ): kế hoạch/QĐ tổ chức thi tay nghề ĐD-KTV, thông báo sinh hoạt khoa học, công văn điều dưỡng, phân công ban chỉ đạo/ban đề thi/giám khảo. Dùng ngay khi user nhắc điều dưỡng, thi tay nghề, KTV, Hội đồng người bệnh, SHKH điều dưỡng, hoặc soạn giấy tờ Phòng Điều dưỡng."
 ---
 
 # Phòng Điều dưỡng — officecli templates

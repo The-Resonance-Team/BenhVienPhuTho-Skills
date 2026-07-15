@@ -1,16 +1,6 @@
 ---
 name: phong-ktda
-description: >
-  Skill Phòng Kế toán dự án (BVĐK tỉnh Phú Thọ): chỉ định thầu DỊCH VỤ 50–dưới 500 triệu
-  (đơn đề xuất, thư mời báo giá dịch vụ, dự toán, tờ trình/QĐ duyệt dự toán & KHLCNT,
-  thư mời/dự thảo/BB hoàn thiện hợp đồng, tờ trình/QĐ duyệt KQLCNT, hợp đồng kinh tế,
-  biên bản nghiệm thu công việc, nghiệm thu khối lượng, thanh lý hợp đồng, giấy đề nghị
-  thanh toán). Dùng ngay khi user nhắc KTDA, kế toán dự án, chỉ định thầu dịch vụ, tờ
-  trình dự toán dịch vụ, KHLCNT dịch vụ, KQLCNT dịch vụ, hợp đồng dịch vụ, nghiệm thu
-  dịch vụ, thanh lý hợp đồng dịch vụ. Xuất file bằng `officecli merge` trên template có
-  sẵn trong `assets/` — KHÔNG soạn Markdown rồi "xuất Word", KHÔNG `officecli new --prompt`.
-  Không dùng cho mua sắm hàng hoá (phong-hcqt/phong-cntt) hay chuyên môn điều dưỡng/QLCL
-  (phong-dieu-duong, phong-qlcl).
+description: "Skill Phòng Kế toán dự án (BVĐK tỉnh Phú Thọ): chỉ định thầu DỊCH VỤ 50–dưới 500 triệu (đơn đề xuất, thư mời báo giá dịch vụ, dự toán, tờ trình/QĐ duyệt dự toán & KHLCNT, hợp đồng kinh tế, biên bản nghiệm thu, thanh lý hợp đồng, giấy đề nghị thanh toán). Dùng ngay khi user nhắc KTDA, kế toán dự án, chỉ định thầu dịch vụ."
 ---
 
 # Phòng Kế toán dự án — officecli templates

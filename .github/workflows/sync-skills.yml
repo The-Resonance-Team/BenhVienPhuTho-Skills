@@ -1,0 +1,81 @@
+name: Sync Skills to OpenWork Cloud
+on:
+  push:
+    branches: [main]
+    paths: ["skills/*/SKILL.md"]
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sync skills to OpenWork Cloud
+        env:
+          OPENWORK_API_KEY: ${{ secrets.OPENWORK_API_KEY }}
+          OPENWORK_API_BASE: ${{ vars.OPENWORK_API_BASE }}
+        run: |
+          if [ -z "$OPENWORK_API_KEY" ]; then
+            echo "::error::OPENWORK_API_KEY secret not set"
+            exit 1
+          fi
+
+          API="${OPENWORK_API_BASE:-http://openwork.bvpt.resonance.io.vn/api/den/v1}"
+
+          # Fetch existing org skills
+          echo "Fetching cloud skills..."
+          existing=$(curl -sf -H "x-api-key: $OPENWORK_API_KEY" "$API/skills")
+          echo "$existing" | jq -r '.skills[] | "\(.id)\t\(.title)"' > /tmp/cloud_skills.txt
+          echo "Cloud skills:"
+          cat /tmp/cloud_skills.txt || echo "(none)"
+
+          updated=0
+          created=0
+
+          for skill_dir in skills/*/; do
+            name=$(basename "$skill_dir")
+            skill_file="$skill_dir/SKILL.md"
+
+            if [ ! -f "$skill_file" ]; then
+              echo "SKIP $name: no SKILL.md"
+              continue
+            fi
+
+            # Match by title (name from frontmatter)
+            skill_id=$(grep -P "\t${name}$" /tmp/cloud_skills.txt | cut -f1)
+            payload=$(jq -n --rawfile text "$skill_file" '{skillText: $text}')
+
+            if [ -n "$skill_id" ]; then
+              # Update existing
+              echo "UPDATE $name → $skill_id"
+              resp=$(curl -sw "\n%{http_code}" -X PATCH \
+                -H "x-api-key: $OPENWORK_API_KEY" \
+                -H "Content-Type: application/json" \
+                -d "$payload" \
+                "$API/skills/$skill_id")
+            else
+              # Create new
+              echo "CREATE $name"
+              resp=$(curl -sw "\n%{http_code}" -X POST \
+                -H "x-api-key: $OPENWORK_API_KEY" \
+                -H "Content-Type: application/json" \
+                -d "$payload" \
+                "$API/skills")
+            fi
+
+            http_code=$(echo "$resp" | tail -1)
+            if [ "$http_code" -ge 200 ] && [ "$http_code" -lt 300 ]; then
+              echo "  OK ($http_code)"
+              if [ -z "$skill_id" ]; then
+                created=$((created + 1))
+              else
+                updated=$((updated + 1))
+              fi
+            else
+              echo "::error::FAIL $name ($http_code): $(echo "$resp" | head -n1)"
+            fi
+          done
+
+          echo ""
+          echo "Done: $updated updated, $created created"

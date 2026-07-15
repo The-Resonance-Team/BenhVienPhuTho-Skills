@@ -1,17 +1,6 @@
 ---
 name: phong-qlcl
-description: >
-  Skill Phòng Quản lý chất lượng (BVĐK tỉnh Phú Thọ): văn bản hành chính QLCL (công văn/
-  kế hoạch/quyết định/quy chế), khảo sát & chỉ số chất lượng (hài lòng NB/NVYT, chỉ số CL,
-  thời gian khám bệnh, Dashboard), sự cố y khoa & an toàn người bệnh (phân loại theo TT43,
-  RCA, khuyến cáo phòng ngừa), tiêu chuẩn chất lượng (ISO 9001:2015, ISO 15189:2022, 5S,
-  Bộ 83 tiêu chí CLBV 2.0, đánh giá nội bộ), đề án cải tiến chất lượng (PDCA/Lean/Six Sigma/
-  FMEA), nội dung đào tạo & truyền thông (bài giảng, poster, bản tin, slide, video hướng dẫn),
-  kiểm tra/tóm tắt văn bản và hỏi-đáp QLCL. Dùng ngay khi user nhắc QLCL, quản lý chất lượng,
-  an toàn người bệnh, sự cố y khoa, ISO, 5S, đề án cải tiến, chỉ số chất lượng bệnh viện, hoặc
-  soạn giấy tờ Phòng QLCL. Chưa có mẫu .docx chính thức của phòng — xem "Xuất file" trước khi
-  hứa xuất Word. Không dùng cho mua sắm/LCNT (phong-hcqt) hay chuyên môn điều dưỡng
-  (phong-dieu-duong).
+description: "Skill Phòng Quản lý chất lượng (BVĐK tỉnh Phú Thọ): văn bản hành chính QLCL, khảo sát & chỉ số chất lượng, sự cố y khoa & an toàn người bệnh, tiêu chuẩn chất lượng (ISO 9001:2015, ISO 15189:2022, 5S, Bộ 83 tiêu chí CLBV 2.0), đề án cải tiến chất lượng (PDCA/Lean/Six Sigma/FMEA), nội dung đào tạo & truyền thông, kiểm tra/tóm tắt văn bản và hỏi-đáp QLCL."
 ---
 
 # Phòng Quản lý chất lượng

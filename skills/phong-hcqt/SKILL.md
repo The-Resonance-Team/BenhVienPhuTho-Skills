@@ -1,15 +1,6 @@
 ---
 name: phong-hcqt
-description: >
-  Skill Phòng Hành chính quản trị (BVĐK tỉnh Phú Thọ): tờ trình/QĐ mua sắm & LCNT,
-  chỉ định thầu 50–dưới 500 triệu, VPP/TSCĐ theo QT HCQT, điều xe, văn thư QT-02,
-  dự trù vật tư, đánh giá NCC, phiếu điều động xe, phiếu VPP, bảng kê chứng từ.
-  Dùng ngay khi user nhắc HCQT, hành chính quản trị, tờ trình dự toán, KHLCNT, KQLCNT,
-  quyết định phê duyệt nhà thầu, hợp đồng hành chính, BBNT, yêu cầu báo giá, dự toán,
-  điều xe, VPP, NCC, hoặc cần xuất .docx/.xlsx đúng thể thức từ template.
-  Xuất file bằng `officecli merge` trên template có sẵn trong `assets/` —
-  KHÔNG soạn Markdown rồi "xuất Word", KHÔNG `officecli new --prompt`.
-  Không dùng cho chuyên môn Điều dưỡng (phong-dieu-duong).
+description: "Skill Phòng Hành chính quản trị (BVĐK tỉnh Phú Thọ): tờ trình/QĐ mua sắm & LCNT, chỉ định thầu 50–dưới 500 triệu, VPP/TSCĐ theo QT HCQT, điều xe, văn thư QT-02, dự trù vật tư, đánh giá NCC, phiếu điều động xe, phiếu VPP, bảng kê chứng từ. Dùng ngay khi user nhắc HCQT, hành chính quản trị, tờ trình dự toán, KHLCNT, KQLCNT, quyết định phê duyệt nhà thầu, hợp đồng hành chính, BBNT, yêu cầu báo giá, dự toán, điều xe, VPP, NCC, hoặc cần xuất .docx/.xlsx đúng thể thức từ template."
 ---
 
 # Phòng Hành chính quản trị — officecli templates

@@ -1,9 +1,6 @@
 ---
 name: setup
-description: >
-  Setup môi trường BV: (1) đảm bảo skill `grilling` có sẵn (nếu cần), (2) kiểm tra/cài
-  `officecli` binary (docx/xlsx/pptx CLI cho AI agent), kiểm tra node/npm. Dùng ngay khi
-  user nói setup, /setup, lần đầu, thiếu officecli, hoặc trước phong-hcqt / phong-dieu-duong.
+description: "Setup môi trường BV: (1) đảm bảo skill grilling có sẵn (nếu cần), (2) kiểm tra/cài officecli binary (docx/xlsx/pptx CLI cho AI agent), kiểm tra node/npm. Dùng ngay khi user nói setup, /setup, lần đầu, thiếu officecli, hoặc trước phong-hcqt / phong-dieu-duong."
 ---
 
 # Setup — tooling (officecli)

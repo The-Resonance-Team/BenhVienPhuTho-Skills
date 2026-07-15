@@ -1,16 +1,6 @@
 ---
 name: phong-cntt
-description: >
-  Skill Phòng Công nghệ thông tin (BVĐK tỉnh Phú Thọ): mua sắm/LCNT thiết bị CNTT
-  (đề xuất, yêu cầu báo giá, tờ trình/QĐ duyệt dự toán & KHLCNT, thư mời/BB hoàn thiện
-  hợp đồng, tờ trình/QĐ duyệt KQLCNT, hợp đồng kinh tế, biên bản nghiệm thu, thanh lý
-  hợp đồng), biên bản giao nhận TSCĐ-CCDC, đề nghị thanh toán từ nhà thầu.
-  Dùng ngay khi user nhắc CNTT, mua sắm thiết bị CNTT, tờ trình dự toán, KHLCNT, KQLCNT,
-  hợp đồng mua bán thiết bị, nghiệm thu bàn giao thiết bị, thanh lý hợp đồng CNTT, hoặc
-  giao nhận tài sản/công cụ dụng cụ CNTT. Xuất file bằng `officecli merge` trên template
-  có sẵn trong `assets/` — KHÔNG soạn Markdown rồi "xuất Word", KHÔNG `officecli new --prompt`.
-  Không dùng cho mua sắm/LCNT ngoài CNTT (phong-hcqt) hay chuyên môn điều dưỡng/QLCL
-  (phong-dieu-duong, phong-qlcl).
+description: "Skill Phòng Công nghệ thông tin (BVĐK tỉnh Phú Thọ): mua sắm/LCNT thiết bị CNTT (đề xuất, yêu cầu báo giá, tờ trình/QĐ duyệt dự toán & KHLCNT, hợp đồng kinh tế, biên bản nghiệm thu, thanh lý hợp đồng), biên bản giao nhận TSCĐ-CCDC. Dùng ngay khi user nhắc CNTT, mua sắm thiết bị CNTT, tờ trình dự toán, KHLCNT, KQLCNT, hợp đồng mua bán thiết bị."
 ---
 
 # Phòng Công nghệ thông tin — officecli templates
