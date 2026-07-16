@@ -1,6 +1,6 @@
 ---
 name: officecli
-description: Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use when the user wants to create, inspect, check formatting, find issues, add charts, or modify Office documents.
+description: Create, analyze, proofread, and modify Office documents (.docx, .xlsx, .pptx) using the officecli CLI tool. Use for generic Office work or as the implementation layer after a more specific BV department skill has been selected; department-specific skills take precedence whenever the request names HCQT, Điều dưỡng, CNTT, KTDA, QLCL, or Vật tư.
 ---
 
 # officecli
@@ -9,17 +9,21 @@ AI-friendly CLI for .docx, .xlsx, .pptx. Single binary, no dependencies, no Offi
 
 ## Install
 
-If `officecli` is not installed:
+Do not install anything implicitly. First run `officecli --version`. If it is missing, explain the required installation and ask the user for approval before changing the machine.
+
+Use an approved package manager only:
 
 ```bash
-# macOS / Linux
-curl -fsSL https://d.officecli.ai/install.sh | bash
+# macOS / Linux with npm
+npm install -g @officecli/officecli
 
-# Windows (PowerShell)
-irm https://d.officecli.ai/install.ps1 | iex
+# macOS with Homebrew
+brew install officecli
 ```
 
 Verify with `officecli --version`. If still not found after install, open a new terminal.
+
+Never pipe an unaudited remote script into `bash` or `iex`, and never treat a missing binary as permission to install automatically.
 
 ---
 
@@ -409,6 +413,8 @@ Example: a fundraising deck task → `officecli load_skill pitch-deck` → use t
 ---
 
 ## Notes
+
+- For the hospital skills, read `references/output-safety.md` before generating or modifying an artifact.
 
 - Paths are **1-based** (XPath convention): `'/body/p[3]'` = third paragraph
 - `--index` is **0-based** (array convention): `--index 0` = first position

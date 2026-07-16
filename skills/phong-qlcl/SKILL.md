@@ -15,12 +15,19 @@ Skill theo phòng **QLCL**. Phòng là đơn vị tham mưu cho Giám đốc và
 - **Không bịa số liệu**: tỷ lệ, số ca, kết quả khảo sát, chỉ số phải có nguồn (Excel/HIS/Form đã thu thập) do người dùng đưa vào. Chưa có dữ liệu → hỏi nguồn trước khi phân tích/viết nhận xét.
 - **Đánh dấu dự thảo**: mọi văn bản hành chính đầu ra ghi rõ "Dự thảo — chờ [Trưởng phòng] xem xét, [Giám đốc] phê duyệt" ở đầu trang, đúng chuỗi thẩm quyền tại `references/qlcl-to-chuc-nhiem-vu.md` mục 4.
 
+## Quản trị dữ liệu bệnh viện
+
+- Ưu tiên dữ liệu đã khử định danh. Không đưa họ tên, mã người bệnh, số hồ sơ, số điện thoại, địa chỉ, hình ảnh, bệnh án, hoặc dữ liệu có thể tái nhận diện vào prompt nếu chưa có phê duyệt của bệnh viện.
+- Giữ dữ liệu sự cố, khảo sát và chỉ số trong file/kho lưu trữ được bệnh viện phê duyệt; không tự gửi sang Google Forms, AppSheet, QR service, cloud storage, web API, hoặc agent từ xa.
+- Nếu user yêu cầu thiết kế Form/QR/AppSheet, chỉ thiết kế schema/checklist không chứa dữ liệu thật, nêu rõ quyền truy cập, thời hạn lưu, người chịu trách nhiệm và bước phê duyệt CNTT/QLCL trước khi triển khai.
+- Tách file dữ liệu nguồn khỏi bản nháp/văn bản đầu ra; chỉ giao bản dự thảo tối thiểu cần thiết và không chèn dữ liệu nhận diện vào phụ lục nếu không bắt buộc.
+
 ## Xuất file
 
-Phòng QLCL **chưa có mẫu `.docx` được seed** trong `assets/` (khác `phong-hcqt`/`phong-dieu-duong` đã có `assets/_seed/`). Vì vậy:
+Phòng QLCL **chưa có runtime `.docx` trong `assets/`**. Vì vậy:
 
 - Mặc định: trả lời bằng **Markdown có cấu trúc đúng thể thức văn bản hành chính** (quốc hiệu–tiêu ngữ, số/ký hiệu để `___` chờ Văn thư cấp, trích yếu, căn cứ pháp lý, nội dung, nơi nhận, thẩm quyền ký) để người dùng dán vào mẫu phòng đang dùng.
-- Khi có mẫu `.docx` thật của phòng (biên bản đánh giá nội bộ ISO, quyết định thành lập tổ, kế hoạch mẫu...): seed vào `assets/_seed/`, gắn `{{KEY}}`, chuyển sang pipeline `officecli merge` theo đúng quy trình đã dùng ở `phong-hcqt` (xem `../phong-hcqt/assets/README.md`) rồi mới bật nhánh xuất `.docx` trực tiếp.
+- Khi có mẫu `.docx` thật của phòng (biên bản đánh giá nội bộ ISO, quyết định thành lập tổ, kế hoạch mẫu...), giữ nguồn ngoài repo và dùng `node scripts/build-runtime-assets.js --source-root <private-root> --skills phong-qlcl`; sau review mới đưa bản runtime đã sanitize vào `assets/` và bật nhánh xuất `.docx`.
 - **Không** dùng `officecli new --prompt` hay Markdown-tự-do làm bố cục thay cho mẫu thật khi mẫu đã tồn tại.
 
 ## Nhánh nghiệp vụ

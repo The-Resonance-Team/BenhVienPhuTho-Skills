@@ -1,5 +1,8 @@
 # Placeholders — phong-dieu-duong
 
+Danh sách dưới đây là gợi ý nghiệp vụ. Token thực tế của từng runtime template
+phải lấy từ `officecli view <template> text --json`; không tự thêm field thiếu.
+
 | Token | Ý nghĩa |
 | --- | --- |
 | {{NAM}} | Năm tổ chức |

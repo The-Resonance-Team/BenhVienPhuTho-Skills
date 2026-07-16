@@ -1,6 +1,6 @@
-# Placeholders / chỗ điền trong template HCQT (bản gốc BV)
+# Placeholders / chỗ điền trong runtime template HCQT
 
-Sau LibreOffice convert, tờ trình/QĐ dùng **mẫu BV thật** (không còn skeleton `{{TOKEN}}`).
+Runtime template là bản đã sanitize từ mẫu bệnh viện. Placeholder thực tế có thể thay đổi theo file; luôn đọc bằng `officecli view <template> text --json` trước khi merge.
 
 Agent **chỉ** sửa text trong `<w:t>` tại các chỗ trống / hướng dẫn sẵn trong XML — giữ `w:rPr`.
 
@@ -20,7 +20,7 @@ Hình thức LCNT: mẫu đã nêu chỉ định thầu rút gọn theo NĐ 214/
 
 ## Quy tắc chung
 
-- Copy cả thư mục `assets/<slug>/` → sửa → pack.
+- Chỉ merge trực tiếp file `.docx` trong `assets/`; không copy thư mục unpack, không pack lại XML thủ công.
 - Không gen layout ngoài `assets/`.
 - Grilling đủ field trước khi pack.
 - Token `{{…}}` (nếu còn ở skeleton backup `_skeleton_bak_*`) chỉ dùng khi chưa convert; bản chính hiện là mẫu BV.
