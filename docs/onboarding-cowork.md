@@ -12,7 +12,7 @@ Tài liệu này hướng dẫn IT Manager BVĐK tỉnh Phú Thọ triển khai 
 
 ## 1. Mời thành viên vào OpenWork
 
-Truy cập: `http://openwork.bvpt.resonance.io.vn/dashboard/members`
+Truy cập: `http://openwork-bvpt.resonance.io.vn/dashboard/members`
 
 Các bước:
 
@@ -166,4 +166,4 @@ Nhân viên **không cần biết khái niệm "skill" hay tên skill**. Chỉ c
 ## 8. Liên hệ hỗ trợ
 
 - IT Manager / Phòng CNTT: `<điền thông tin liên hệ nội bộ>`
-- OpenWork Cloud: `http://openwork.bvpt.resonance.io.vn`
+- OpenWork Cloud: `http://openwork-bvpt.resonance.io.vn`
