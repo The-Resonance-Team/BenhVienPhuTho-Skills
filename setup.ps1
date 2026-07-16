@@ -208,25 +208,24 @@ $openworkInstalled = Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentV
 if ($openworkInstalled) {
     Write-Host "  [SKIP] OpenWork already installed" -ForegroundColor DarkGray
 } else {
-    $owUrl = "https://openworklabs.com/download"
-    $owPath = "$env:TEMP\OpenWork-Setup.exe"
-    Write-Host "  [*] Downloading OpenWork installer..." -ForegroundColor Yellow
     try {
-        # Follow redirects to get actual download URL
-        $response = Invoke-WebRequest -Uri $owUrl -MaximumRedirection 5 -UseBasicParsing
-        $downloadUrl = $response.Content
-        # Try to extract direct download link from page
-        if ($downloadUrl -match '(https?://[^\s"]+\.exe[^\s"]*)') {
-            $downloadUrl = $Matches[1]
+        Write-Host "  [*] Fetching latest OpenWork release info..." -ForegroundColor Yellow
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        $release = Invoke-RestMethod -Uri "https://api.github.com/repos/different-ai/openwork/releases/latest" -Headers @{ "User-Agent" = "BVPT-Setup-Script" }
+        $asset = $release.assets | Where-Object { $_.name -like "openwork-win-x64-*.exe" } | Select-Object -First 1
+        if (-not $asset) {
+            throw "No win-x64 .exe asset found in latest release ($($release.tag_name))"
         }
-        if (Get-File -Url $downloadUrl -Out $owPath) {
-            Write-Host "  [*] Installing OpenWork..." -ForegroundColor Yellow
+        $owPath = "$env:TEMP\$($asset.name)"
+        Write-Host "  [*] Latest version: $($release.tag_name)" -ForegroundColor Yellow
+        if (Get-File -Url $asset.browser_download_url -Out $owPath) {
+            Write-Host "  [*] Installing OpenWork $($release.tag_name)..." -ForegroundColor Yellow
             Start-Process $owPath -Wait -NoNewWindow
             Remove-Item $owPath -ErrorAction SilentlyContinue
-            Write-Host "  [OK] OpenWork installed" -ForegroundColor Green
+            Write-Host "  [OK] OpenWork $($release.tag_name) installed" -ForegroundColor Green
         }
     } catch {
-        Write-Host "  [!] OpenWork install failed. Download manually from: https://openworklabs.com/download" -ForegroundColor Red
+        Write-Host "  [!] OpenWork install failed: $_. Download manually from: https://github.com/different-ai/openwork/releases/latest" -ForegroundColor Red
     }
 }
 
