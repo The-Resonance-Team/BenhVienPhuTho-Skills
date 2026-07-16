@@ -15,7 +15,7 @@ Nguồn: gói `dieu-duong` dưới `{TAI_LIEU_BV}` — xem `references/dieu-duon
 
 ## Điều kiện tiên quyết / setup
 
-Giống `phong-hcqt`: chỉ cần `officecli` trên PATH (skill `setup`). Không còn Python/giải nén/nén/xác thực.
+Giống `phong-hcqt`: chỉ cần `officecli` trên PATH (skill `setup`) và đọc `../officecli/references/output-safety.md` trước khi sinh file.
 **UX:** trả lời người dùng trước khi gửi file.
 
 ## Thu thập trường qua hội thoại (grilling)
@@ -40,11 +40,10 @@ Giống `phong-hcqt`: chỉ cần `officecli` trên PATH (skill `setup`). Không
 
 ## Tham chiếu nhanh
 
-### Đã convert sang `{{KEY}}` + `officecli merge` (14)
+### Runtime templates đã sanitize + `officecli merge` (13)
 
 | Nhiệm vụ                      | Template                            |
 | ----------------------------- | ----------------------------------- |
-| Kế hoạch thi tay nghề ĐD/KTV | `assets/ke-hoach-thi-tay-nghe.docx` |
 | Nghị quyết (ND30)             | `assets/nd30-mau-1.1-nghi-quyet.docx` |
 | Quyết định trực tiếp (ND30)    | `assets/nd30-mau-1.2-quyet-dinh-truc-tiep.docx` |
 | Quyết định gián tiếp (ND30)   | `assets/nd30-mau-1.3-quyet-dinh-gian-tiep.docx` |
@@ -59,12 +58,6 @@ Giống `phong-hcqt`: chỉ cần `officecli` trên PATH (skill `setup`). Không
 | Quy trình chăm sóc             | `assets/mau-quy-trinh-cham-soc.docx` |
 | Truyền thông GDSK              | `assets/mau-truyen-thong-gdsk.docx`  |
 
-#### Biểu mẫu Excel (1)
-
-| Nhiệm vụ                      | Template                            |
-| ----------------------------- | ----------------------------------- |
-| Điểm kiểm tra tay nghề ĐD/KTV | `assets/diem-kiem-tra-tay-nghe.xlsx` |
-
 | Việc khác                           | File                                            |
 | ----------------------------------- | ----------------------------------------------- |
 | Đọc nhóm tài liệu có trong gói ĐD  | `references/dieu-duong-index.md`                |
@@ -77,7 +70,9 @@ Giống `phong-hcqt`: chỉ cần `officecli` trên PATH (skill `setup`). Không
 
 **Cấm** `officecli new --prompt`, Markdown → Word, hay sinh bố cục ngoài `assets/`.
 
-Pipeline duy nhất: `officecli merge assets/<slug>.docx <output>.docx --data <fields>.json` → grep kiểm tra hết `{{...}}` → trả người dùng.
+Pipeline duy nhất: `officecli merge assets/<slug>.docx <output>.docx --data <fields>.json` → `officecli validate` → `officecli view <output> issues --type content` → đọc text tìm `{{...}}` → trả người dùng.
+
+`ke-hoach-thi-tay-nghe.docx` và `diem-kiem-tra-tay-nghe.xlsx` chưa có trong runtime bundle hiện tại. Khi user yêu cầu một trong hai, báo thiếu asset và xin mẫu đã được phê duyệt; không tự dựng bố cục mới.
 
 Trường tối thiểu KH thi tay nghề: `{{NAM}}`, `{{DOI_TUONG}}`, `{{THOI_GIAN_DIA_DIEM}}`; `{{BAN_CHI_DAO}}` để trống nếu chưa có QĐ.
 
@@ -95,7 +90,9 @@ Câu mở đầu:
 Lấy tất cả `{{KEY}}` từ template đã chọn — đây là nguồn duy nhất, **không dựa vào bảng cứng**:
 
 ```bash
-unzip -p assets/<template>.docx word/document.xml | grep -o '{{[^}]*}}' | sort -u
+officecli view assets/<template>.docx text --json
+
+Dùng JSON trả về để tìm các token `{{KEY}}`.
 ```
 
 ### Bước 3: Lọc trường cần hỏi
@@ -127,14 +124,12 @@ Sau khi đủ trường → tóm tắt toàn bộ giá trị → xin xác nhận
 
 ## Sinh file
 
+Tạo `fields.json` bằng file tool an toàn trong thư mục tạm, quyền hạn chế; không in nội dung và xoá file sau khi kiểm tra. Chỉ merge một runtime template có thật trong `assets/`.
+
 ```bash
-cat > /tmp/fields.json <<'JSON'
-{"NAM": "2026", "DOI_TUONG": "...", "MUC_DICH": "...", "THOI_GIAN_DIA_DIEM": "...", "BAN_CHI_DAO": "...", "CAC_BAN": "...", "KINH_PHI": "...", "HO_TEN_KY": "..."}
-JSON
-
-officecli merge assets/ke-hoach-thi-tay-nghe.docx out.docx --data /tmp/fields.json
-
-unzip -p out.docx word/document.xml | grep -o '{{[^}]*}}' && echo "CÒN SÓT PLACEHOLDER — dừng lại"
+officecli merge assets/<slug>.docx out.docx --data /tmp/fields.json
+officecli validate out.docx
+officecli view out.docx issues --type content --limit 100
 ```
 
 ### Quy tắc quan trọng
@@ -143,7 +138,7 @@ unzip -p out.docx word/document.xml | grep -o '{{[^}]*}}' && echo "CÒN SÓT PLA
 - Không dùng Markdown / `officecli new --prompt` làm bố cục.
 - Số VB `___/KH-ĐD` để Văn thư cấp.
 - Không bịa tên Ban chỉ đạo / điểm thi nếu người dùng chưa cung cấp.
-- Sau merge: grep kiểm tra không còn `{{...}}` sót.
+- Sau merge: đọc text bằng `officecli view out.docx text --json` để kiểm tra không còn `{{...}}` sót; sau đó xoá `fields.json` tạm.
 
 ## Sau khi xong
 

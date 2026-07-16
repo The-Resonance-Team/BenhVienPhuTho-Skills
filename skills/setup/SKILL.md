@@ -1,6 +1,6 @@
 ---
 name: setup
-description: "Setup môi trường BV: (1) đảm bảo skill grilling có sẵn (nếu cần), (2) kiểm tra/cài officecli binary (docx/xlsx/pptx CLI cho AI agent), kiểm tra node/npm. Dùng ngay khi user nói setup, /setup, lần đầu, thiếu officecli, hoặc trước phong-hcqt / phong-dieu-duong."
+description: "Setup môi trường BV: kiểm tra skill grilling, officecli, Node và npm. Dùng khi user nói setup, /setup, lần đầu, hoặc một skill báo thiếu tooling. Không tự cài đặt; nếu thiếu dependency thì xin user phê duyệt trước."
 ---
 
 # Setup — tooling (officecli)
@@ -10,7 +10,7 @@ description: "Setup môi trường BV: (1) đảm bảo skill grilling có sẵn
 Hai việc trong một skill:
 
 1. **Grilling tooling** — đảm bảo skill `grilling` có sẵn (cài qua `npx skills add ... --skill grilling` nếu thiếu). Chỉ cần khi user muốn grilling thủ công.
-2. **officecli tooling** — đảm bảo binary `officecli` có sẵn trên PATH (cài nếu thiếu).
+2. **officecli tooling** — kiểm tra binary `officecli` có sẵn trên PATH (chỉ cài sau khi user phê duyệt).
 
 Upstream: [`iOfficeAI/OfficeCLI`](https://github.com/iOfficeAI/OfficeCLI) — single-binary CLI, đọc/sửa/tạo `.docx`/`.xlsx`/`.pptx`. `phong-hcqt`/`phong-dieu-duong` dùng lệnh `officecli merge <template>.docx <output>.docx --data <fields>.json` để điền `{{KEY}}` trong template.
 
@@ -24,6 +24,8 @@ npx skills add https://github.com/mattpocock/skills --skill grilling
 
 Cài xong → thử gọi lại skill `grilling`. Nếu vẫn không thấy, báo user rõ ràng.
 
+Không tự cài skill trong lúc xử lý tài liệu. Việc tải/cài package là thay đổi máy và phải có xác nhận của user trước.
+
 Cần Node/npm (`npx`) trên máy — nếu thiếu, dùng cùng lúc với bước cài `officecli`.
 
 ## officecli tooling
@@ -32,16 +34,17 @@ Không vendor, không git-clone — một binary duy nhất trên PATH.
 
 ```
 officecli --version    # đã cài → in version, thoát code 0
-officecli               # bare invocation cũng tự install nếu thiếu (theo upstream)
+officecli               # chỉ kiểm tra binary hiện có; không tự install
 ```
 
-Cài khi thiếu (ưu tiên theo thứ tự có sẵn trên máy):
+Cài khi thiếu, sau khi user phê duyệt (ưu tiên theo thứ tự có sẵn trên máy):
 
 ```bash
 npm install -g @officecli/officecli   # có Node/npm
-# hoặc: curl -fsSL https://raw.githubusercontent.com/iOfficeAI/OfficeCLI/main/install.sh | bash
 # hoặc: brew install officecli
 ```
+
+Không dùng `curl | bash`, `wget | sh`, `irm | iex`, hoặc lệnh tự tải script từ URL.
 
 ## Đường dẫn nhanh (bắt buộc — chống chậm mỗi session)
 
@@ -64,15 +67,17 @@ Kiểm tra = đọc danh sách skill / chạy `--version` (vài giây). **Cấm*
 ## Các bước (thứ tự)
 
 1. **Kiểm tra đường dẫn nhanh** (mục trên). Cả 2 mục OK → báo "đã sẵn" → dừng setup.
-2. Thiếu skill `grilling` → cài (`npx skills add https://github.com/mattpocock/skills --skill grilling`) → xác nhận gọi được.
-3. Thiếu officecli → cài (mục trên) → xác nhận lại `officecli --version`.
-4. Báo user kết quả ngắn.
+2. Kiểm tra `node --version` và `npm --version` nếu có bước cài package.
+3. Thiếu skill `grilling` → xin phê duyệt rồi mới cài (`npx skills add https://github.com/mattpocock/skills --skill grilling`) → xác nhận gọi được.
+4. Thiếu officecli → xin phê duyệt rồi mới cài (mục trên) → xác nhận lại `officecli --version`.
+5. Báo user kết quả ngắn.
 
 ## Quy tắc quan trọng
 
 - Không hardcode đường dẫn ổ đĩa.
-- Thiếu skill `grilling` → cài đúng lệnh `npx skills add https://github.com/mattpocock/skills --skill grilling`.
-- **Cấm** `officecli new <loại> --prompt "..."` cho giấy tờ hành chính BV. Chỉ dùng `officecli merge <template>.docx <output>.docx --data <fields>.json` trên template có sẵn trong `assets/`.
+- Thiếu skill `grilling` → xin phê duyệt trước khi chạy `npx skills add https://github.com/mattpocock/skills --skill grilling`.
+- **Cấm** `officecli new <loại> --prompt "..."` cho giấy tờ hành chính BV. Chỉ dùng `officecli merge <template>.docx <output>.docx --data <fields>.json` trên runtime template có sẵn trong skill của phòng.
+- Đọc `../officecli/references/output-safety.md` trước khi sinh file.
 
 ## Sau khi xong
 

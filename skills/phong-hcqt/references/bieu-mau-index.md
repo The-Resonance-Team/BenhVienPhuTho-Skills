@@ -1,10 +1,10 @@
 # Index biểu mẫu — HCQT + chỉ định thầu
 
-**Nguồn gốc:** các gói `{TAI_LIEU_BV}` — mã `hcqt-quy-trinh`, `thau-duoi-50`, `thau-50-500` (xem `../../DATA-MAP.md`).
+**Nguồn gốc:** bộ tài liệu bệnh viện được cung cấp ngoài repo. Danh sách runtime hiện hành phải đối chiếu với `../assets/README.md`.
 
 ## A. Biểu mẫu quy trình HCQT (`HCQT-QTQL-*`)
 
-Slug đặt theo **nội dung thực tế** đọc từ `word/document.xml` (đã verify từng file bằng grep `<w:t>`), không theo tên gọi tóm tắt trong PDF quy trình.
+Slug đặt theo nội dung thực tế của runtime template; khi cần kiểm tra, dùng `officecli view <template> text --json`, không unpack XML thủ công.
 
 | Mã | Nội dung thực tế trong file | Có file trong zip? | Slug XML (`assets/`) |
 | --- | --- | --- | --- |
@@ -58,4 +58,4 @@ Thứ tự hồ sơ gợi ý (đầy hơn &lt;50tr), kèm slug XML:
 13. Giấy đề nghị thanh toán — `giay-de-nghi-thanh-toan`
 14. Bảng kê chứng từ thanh toán (`.xls`, không unpack)
 
-Zip gốc: gói `thau-duoi-50` (file `01.…`) và `thau-50-500` (file `03.…`) dưới `{TAI_LIEU_BV}`. 25 template đã unpack ra `assets/<slug>/word/document.xml`; seed `.docx` gốc lưu ở `assets/_seed/`.
+Các runtime template hiện có là 23 file `.docx` trong `../assets/`; không commit seed, file nguồn, thư mục unpack hoặc dữ liệu hồ sơ thật. Xem `../assets/README.md` để rebuild từ nguồn riêng đã được phê duyệt.

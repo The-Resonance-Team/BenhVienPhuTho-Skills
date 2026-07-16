@@ -1,6 +1,6 @@
 # HCQT — Mua sắm, VPP, tài sản, BĐSC (tóm tắt vận hành)
 
-**Nguồn:** gói `hcqt-quy-trinh` (`{TAI_LIEU_BV}/Quy trình quản lý vận hành (Phòng HCQT)-….zip`) — xem `../../DATA-MAP.md`.
+**Nguồn:** bộ quy trình bệnh viện được cung cấp ngoài repo; chỉ dùng nội dung đã được phê duyệt trong skill/reference này và runtime template ở `../assets/`.
 **Mã series:** `HCQT-QTQL-0x` · Phiên bản trên bìa: 1.0  
 **Hiệu lực:** QT-01…06 = 01/8/2023; QT-07…08 = 10/6/2024
 

@@ -9,7 +9,7 @@ description: "Skill Phòng Công nghệ thông tin (BVĐK tỉnh Phú Thọ): mu
 
 Skill theo phòng **CNTT**, phủ toàn bộ chu trình mua sắm/LCNT một gói thầu thiết bị CNTT: đề xuất → yêu cầu báo giá → tờ trình + QĐ duyệt dự toán & KHLCNT → thư mời + dự thảo + biên bản hoàn thiện hợp đồng → tờ trình + QĐ duyệt KQLCNT → hợp đồng kinh tế → nghiệm thu → thanh lý → giao nhận tài sản → đề nghị thanh toán. 14 template `.docx` trong `assets/`, sinh file bằng **`officecli merge`** (mỗi template = một file `.docx`, gắn sẵn `{{KEY}}` tại các trường cần điền).
 
-**Trước khi merge:** đảm bảo đã chạy skill **`setup`** (kiểm tra/cài `officecli`).
+**Trước khi merge:** đảm bảo đã chạy skill **`setup`** (kiểm tra/cài `officecli`) và đọc `../officecli/references/output-safety.md`.
 
 ## Nguồn gốc template — đọc trước khi thêm template mới
 
@@ -47,9 +47,11 @@ Trường đầy đủ theo từng template (kể cả trường dùng chung và
 
 **Hỏi tất cả trường còn thiếu GỘP MỘT LẦN** — không hỏi từng câu.
 
-1. **Trích xuất placeholder** từ template bằng grep `{{KEY}}` — nguồn duy nhất, không dựa vào bảng cứng:
+1. **Trích xuất placeholder** từ runtime template bằng `officecli view` — nguồn duy nhất, không dựa vào bảng cứng:
    ```bash
-   unzip -p assets/<template>.docx word/document.xml | grep -o '{{[^}]*}}' | sort -u
+    officecli view assets/<template>.docx text --json
+
+   Dùng JSON trả về để tìm các token `{{KEY}}`.
    ```
 2. **Trường suy luận được** từ ngữ cảnh hội thoại/workspace → ghi nhận, **xác nhận lại với người dùng** trước khi dùng.
 3. **Gộp tất cả trường chưa có** → hỏi một lần, đánh số, mỗi câu 1–2 dòng, có gợi ý mặc định.
@@ -71,19 +73,14 @@ Sau khi đủ trường → tóm tắt toàn bộ giá trị → xin xác nhận
 
 ## Sinh file
 
-```bash
-# 1) Viết trường đã thu thập vào JSON — KHÔNG truyền JSON qua shell string
-cat > /tmp/fields.json <<'JSON'
-{"TEN_GOI_THAU": "...", "TEN_NHA_THAU": "...", "DU_TOAN": "...", "DU_TOAN_BANG_CHU": "...",
- "HO_TEN_KY": "...", "NGAY_KY": "20", "THANG_KY": "07", "NAM_KY": "2026", ...}
-JSON
+1. Tạo `fields.json` bằng file tool an toàn trong thư mục tạm, quyền hạn chế; không truyền JSON qua shell string, không in nội dung, và xoá file sau khi hoàn tất.
+2. Merge một lần:
 
-# 2) Merge — một lệnh
-officecli merge assets/to-trinh-du-toan-khlcnt.docx out.docx --data /tmp/fields.json
+   ```bash
+   officecli merge assets/to-trinh-du-toan-khlcnt.docx out.docx --data /tmp/fields.json
+   ```
 
-# 3) Kiểm tra không còn {{...}} sót lại trước khi giao người dùng
-unzip -p out.docx word/document.xml | grep -o '{{[^}]*}}' && echo "CÒN SÓT PLACEHOLDER — dừng lại"
-```
+3. Chạy toàn bộ checklist trong `../officecli/references/output-safety.md`: `officecli validate`, `officecli view ... issues`, đọc text để tìm `{{...}}`, rồi kiểm tra lại các ô phụ lục sau `set`.
 
 ### Bảng phụ lục "Danh mục hàng hoá" (dòng biến đổi) — `officecli set`
 
@@ -102,6 +99,7 @@ Chỉ số N/R/C khác nhau theo từng template — xác nhận bằng `get` tr
 - Số văn bản (`___/QĐ-BV`, `___/HĐKT/...`) để `___` — Văn thư cấp số.
 - Không bịa chữ ký/số QĐ/tên nhà thầu/MST/số tài khoản nếu người dùng chưa cung cấp.
 - Sau merge: grep kiểm tra không còn `{{...}}` sót; nếu còn → trường đó chưa có trong dữ liệu, hỏi lại.
+- Không giao file nếu `officecli validate` hoặc `officecli view <file> issues --type content` còn lỗi chưa xử lý.
 
 ## Sau khi xong
 

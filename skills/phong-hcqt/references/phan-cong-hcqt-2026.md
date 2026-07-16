@@ -1,6 +1,6 @@
 # Phân công nhiệm vụ Phòng HCQT — 2026 (tóm tắt)
 
-**Nguồn:** gói `phan-cong-hcqt` — file `A-PHÂN CÔNG NHIỆM VỤ-2026- PHÒNG HCQT (1).docx` dưới `{TAI_LIEU_BV}` (xem `../../DATA-MAP.md`).
+**Nguồn:** tài liệu phân công đã được bệnh viện phê duyệt và cung cấp ngoài repo; không lưu bản nguồn chứa dữ liệu riêng tư tại đây.
 
 ## Quy mô
 

@@ -1,6 +1,6 @@
 # Chỉ định thầu — ngưỡng & bộ hồ sơ BVĐK tỉnh Phú Thọ
 
-**Nguồn:** gói `thau-duoi-50` và `thau-50-500` dưới `{TAI_LIEU_BV}` (xem `../../DATA-MAP.md`).
+**Nguồn:** bộ hồ sơ đấu thầu được bệnh viện phê duyệt và cung cấp ngoài repo; runtime template tương ứng nằm trong `../assets/`.
 Đọc khi user nói chỉ định thầu, LCNT, tờ trình dự toán, phê duyệt KQLCNT, mua sắm dưới 500 triệu.
 
 ## Phân nhánh theo giá trị (theo tên bộ mẫu BV)

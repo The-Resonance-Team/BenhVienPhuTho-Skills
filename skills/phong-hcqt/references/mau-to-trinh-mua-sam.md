@@ -1,6 +1,6 @@
 # Khung tờ trình / quyết định mua sắm (theo bộ mẫu chỉ định thầu BV)
 
-**Nguồn tên mẫu:** gói `thau-duoi-50` (&lt;50tr) và `thau-50-500` (50–&lt;500tr MSHH) dưới `{TAI_LIEU_BV}` (xem `../../DATA-MAP.md`).
+**Nguồn tên mẫu:** bộ tài liệu bệnh viện được cung cấp ngoài repo; runtime template tương ứng nằm trong `../assets/`.
 
 Skill soạn **nội dung nháp** đúng thể thức NĐ 30; số văn bản để trống cho Văn thư cấp. Không giả lập chữ ký.
 

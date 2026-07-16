@@ -1,6 +1,6 @@
 # HCQT — Văn bản & quy trình liên quan soạn thảo
 
-**Nguồn:** gói `hcqt-quy-trinh` + `phan-cong-hcqt` dưới `{TAI_LIEU_BV}` (xem `../../DATA-MAP.md`).
+**Nguồn:** bộ quy trình và phân công được bệnh viện phê duyệt, cung cấp ngoài repo; không phụ thuộc đường dẫn nguồn cục bộ.
 
 Đọc khi user soạn công văn/tờ trình/thông báo/quyết định **theo nghiệp vụ HCQT**, hoặc hỏi quy trình văn thư BV.
 

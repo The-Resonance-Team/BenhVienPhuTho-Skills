@@ -9,7 +9,7 @@ description: "Skill Phòng Hành chính quản trị (BVĐK tỉnh Phú Thọ): 
 
 Skill theo phòng **HCQT**. Đầu ra giấy tờ hành chính là file `.docx` sinh bằng **`officecli merge`** trên template có sẵn trong `assets/` (mỗi template = một file `.docx` duy nhất, đã gắn `{{KEY}}` tại các trường cần điền).
 
-**Trước khi merge:** đảm bảo đã chạy skill **`setup`** (kiểm tra/cài `officecli`).
+**Trước khi merge:** đảm bảo đã chạy skill **`setup`** (kiểm tra/cài `officecli`) và đọc `../officecli/references/output-safety.md`.
 
 Nguồn dữ liệu gốc: mã gói `thau-50-500`, `thau-duoi-50`, `hcqt-quy-trinh`, `phan-cong-hcqt` dưới `{TAI_LIEU_BV}`. Không hardcode đường dẫn máy.
 
@@ -205,7 +205,7 @@ Mỗi template có tập placeholder riêng. Dưới đây là bảng tra cứu 
 
 ## Tham chiếu nhanh — trạng thái template
 
-### Đã convert sang `{{KEY}}` + `officecli merge` (24)
+### Runtime templates đã sanitize + `officecli merge` (23 DOCX)
 
 **Lưu ý:** mỗi template có tập placeholder riêng — không có bộ key chung. Luôn trich xuat dong tu template, khong dung cung bang field.
 
@@ -233,22 +233,18 @@ Mỗi template có tập placeholder riêng. Dưới đây là bảng tra cứu 
 
 | Nhiệm vụ                       | Template                                  |
 | ------------------------------- | ----------------------------------------- |
-| Dự trù vật tư                  | `assets/du-tru-vat-tu.docx`               |
-| Danh sách nhà cung ứng         | `assets/danh-sach-ncc.docx`               |
-| Đánh giá nhà cung ứng mới     | `assets/danh-gia-ncc-moi.docx`            |
-| Đánh giá nhà cung ứng cũ      | `assets/danh-gia-ncc-cu.docx`             |
-| Phiếu điều động xe ô tô       | `assets/dieu-dong-xe.docx`               |
-| Sổ lịch trình xe               | `assets/slich-trinh-xe.docx`             |
-| Phiếu yêu cầu lãnh VPP        | `assets/phieu-yeu-cau-linh-vpp.docx`     |
-| Phiếu dự trù VPP              | `assets/phieu-du-tru-vpp.docx`           |
+| Dự trù vật tư                  | `assets/qtvh-01-bm01-du-tru-vat-tu.docx` |
+| Danh sách nhà cung ứng         | `assets/qtvh-01-bm02-danh-sach-ncc.docx` |
+| Đánh giá nhà cung ứng mới     | `assets/qtvh-01-bm03-danh-gia-ncc-moi.docx` |
+| Đánh giá nhà cung ứng cũ      | `assets/qtvh-01-bm04-danh-gia-ncc-cu.docx` |
+| Phiếu điều động xe ô tô       | `assets/qtvh-04-bm01-dieu-dong-xe.docx` |
+| Sổ lịch trình xe               | `assets/qtvh-04-bm02-dieu-dong-xe.docx` |
+| Phiếu yêu cầu lãnh VPP        | `assets/qtvh-05-bm01-van-phong-pham.docx` |
+| Phiếu dự trù VPP              | `assets/qtvh-05-bm02-van-phong-pham.docx` |
 
-#### Biểu mẫu Excel (1)
+Biểu mẫu Excel `bang-ke-chung-tu-thanh-toan.xlsx` chưa có trong runtime bundle hiện tại. Khi user yêu cầu, báo thiếu asset và xin file `.xlsx` đã được phê duyệt; không tự dựng bảng mới.
 
-| Nhiệm vụ                       | Template                                  |
-| ------------------------------- | ----------------------------------------- |
-| Bảng kê chứng từ thanh toán   | `assets/bang-ke-chung-tu-thanh-toan.xlsx` |
-
-Mỗi template: các trường thân bài đã gắn `{{KEY}}`. Bảng phụ lục (danh sách hàng hoá, kế hoạch LCNT dạng dòng biến đổi) **chưa** kết nối — xem "Bảng phụ lục" bên dưới.
+Mỗi runtime template: các trường thân bài đã được sanitize và có thể chứa `{{KEY}}`. Bảng phụ lục (danh sách hàng hoá, kế hoạch LCNT dạng dòng biến đổi) vẫn phải điền bằng `officecli set` theo hướng dẫn bên dưới.
 
 ## Đọc nghiệp vụ / biểu mẫu / phân công
 
@@ -290,7 +286,9 @@ Câu mở đầu:
 Lấy tất cả `{{KEY}}` từ template đã chọn — đây là nguồn duy nhất, **không dựa vào bảng cứng**:
 
 ```bash
-unzip -p assets/<template>.docx word/document.xml | grep -o '{{[^}]*}}' | sort -u
+officecli view assets/<template>.docx text --json
+
+Dùng JSON trả về để tìm các token `{{KEY}}`.
 ```
 
 ### Bước 3: Lọc trường cần hỏi
@@ -324,18 +322,16 @@ Sau khi đủ trường → tóm tắt toàn bộ giá trị → xin xác nhận
 
 ### Trường thân bài (vô hướng) — `officecli merge`
 
-```bash
-# 1) Viết trường đã thu thập vào JSON (KHÔNG truyền JSON qua shell string — dấu Tiếng Việt/quote dễ vỡ)
-cat > /tmp/fields.json <<'JSON'
-{"TEN_GOI_THAU": "...", "DU_TOAN": "...", "PHONG_BAN": "...", "NGAY_KY": "20", "THANG_KY": "07", "NAM_KY": "2026", ...}
-JSON
+1. Tạo `fields.json` bằng file tool an toàn trong thư mục tạm, quyền hạn chế; không in nội dung và xoá file sau khi kiểm tra.
+2. Merge và validate:
 
-# 2) Merge — một lệnh, không unpack/pack/validate thủ công
-officecli merge assets/to-trinh-du-toan-khlcnt.docx out.docx --data /tmp/fields.json
+   ```bash
+   officecli merge assets/to-trinh-du-toan-khlcnt.docx out.docx --data /tmp/fields.json
+   officecli validate out.docx
+   officecli view out.docx issues --type content --limit 100
+   ```
 
-# 3) Kiểm tra không còn {{...}} sót lại trước khi giao người dùng
-unzip -p out.docx word/document.xml | grep -o '{{[^}]*}}' && echo "CÒN SÓT PLACEHOLDER — dừng lại"
-```
+3. Đọc text bằng `officecli view out.docx text --json`, kiểm tra không còn `{{...}}`, rồi kiểm tra lại từng ô phụ lục sau `set`.
 
 ### Bảng phụ lục (dòng biến đổi: danh sách hàng hoá, dịch vụ) — `officecli set`
 
@@ -358,7 +354,7 @@ officecli set out.docx "/body/tbl[6]/tr[2]/tc[9]" --prop text="Cái"
 - Không dùng Markdown / `officecli new --prompt` làm nguồn bố cục.
 - Số văn bản để `___` — Văn thư cấp số.
 - Không bịa chữ ký / số QĐ / tên NCC nếu người dùng chưa cung cấp.
-- Sau merge: kiểm tra không còn `{{...}}` sót (xem trên); nếu còn → trường đó chưa có trong dữ liệu, hỏi lại người dùng.
+- Sau merge: nếu còn `{{...}}` hoặc validation/content issues → dừng, hỏi lại người dùng, không giao file.
 - Sau khi xong: trả lời người dùng trước khi tuyên bố "xong với NVBV".
 
 ## Sau khi xong
