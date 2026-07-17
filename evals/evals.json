@@ -217,6 +217,30 @@
       "prompt": "Create a stationery request and vehicle dispatch form for HCQT.",
       "expected_output": "Routes to phong-hcqt rather than Vật tư.",
       "files": []
+    },
+    {
+      "id": "phong-tccb-1",
+      "target_skill": "phong-tccb",
+      "should_trigger": true,
+      "prompt": "Draft the full retirement chain for a nurse retiring next quarter: the hospital's retirement decision, the notice to the employee, and the request letter to provincial social insurance.",
+      "expected_output": "Uses phong-tccb's retirement runtime templates, asks for the employee's identity/BHXH/bank fields instead of fabricating them, keeps the legal-citation 'Căn cứ' block out of merge (resolved per-paragraph and confirmed rather than copied from a stale source citation), and stops before the director's signature.",
+      "files": []
+    },
+    {
+      "id": "phong-tccb-2",
+      "target_skill": "phong-tccb",
+      "should_trigger": true,
+      "prompt": "Issue a work-tenure confirmation letter for a doctor applying for a practicing certificate, and notify social insurance of this month's personnel changes for 3 staff.",
+      "expected_output": "Confirms personal-identifier fields before filling, treats them as data protected under Nghị định 13/2023/NĐ-CP kept out of any file that would be committed, clones the personnel-change table row per person via officecli add, and validates/reads back both documents before delivery.",
+      "files": []
+    },
+    {
+      "id": "phong-tccb-3",
+      "target_skill": "phong-tccb",
+      "should_trigger": false,
+      "prompt": "Draft a quality-incident corrective-action report for a medication error, keeping patient identifiers out of the draft.",
+      "expected_output": "Routes to phong-qlcl rather than TCCB; TCCB does not claim ownership of clinical quality/incident workflows.",
+      "files": []
     }
   ]
 }

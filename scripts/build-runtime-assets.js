@@ -131,6 +131,7 @@ function copySanitizedDocx(source, output) {
   const stagedOutput = `${output}.staged-${process.pid}`;
   try {
     run("unzip", ["-q", source, "-d", tempRoot]);
+    run("chmod", ["-R", "u+rwX", tempRoot]);
     const wordRoot = path.join(tempRoot, "word");
     const xmlFiles = fs.existsSync(wordRoot)
       ? fs.readdirSync(wordRoot).filter((name) => name.endsWith(".xml"))
