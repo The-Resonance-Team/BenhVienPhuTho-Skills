@@ -8,14 +8,28 @@ Muốn biết cách cài đặt máy trạm, đăng nhập OpenWork, chọn work
 
 ## 1. Cách kích hoạt skill
 
-Không có lệnh riêng để "gọi skill". Bạn chỉ cần **mô tả việc cần làm bằng tiếng Việt tự nhiên**, nhắc rõ:
+Cách chắc chắn nhất: gõ **lệnh gạch chéo `/phong-<tên phòng>`** ngay đầu tin nhắn, gọi đúng skill của phòng mình, sau đó mô tả việc cần làm:
+
+| Phòng ban | Lệnh |
+|---|---|
+| Hành chính quản trị | `/phong-hcqt` |
+| Điều dưỡng | `/phong-dieu-duong` |
+| Quản lý chất lượng | `/phong-qlcl` |
+| Công nghệ thông tin | `/phong-cntt` |
+| Kế toán dự án | `/phong-ktda` |
+| Vật tư – TBYT | `/phong-vattu` |
+| Tổ chức cán bộ | `/phong-tccb` |
+
+Ví dụ: `/phong-hcqt soạn tờ trình phê duyệt dự toán và KHLCNT mua văn phòng phẩm quý 3`.
+
+Không nhớ đúng lệnh hoặc không gõ `/` cũng không sao — chỉ cần **mô tả việc cần làm bằng tiếng Việt tự nhiên**, nhắc rõ:
 
 1. **Tên phòng ban** hoặc từ khóa nghiệp vụ của phòng (vd. "TCCB", "nghỉ hưu", "điều xe", "chỉ định thầu dịch vụ"...).
 2. **Loại giấy tờ** muốn soạn (tờ trình, quyết định, công văn, biên bản...).
 
-AI đọc mô tả kỹ thuật (`description`) của từng skill và tự chọn skill khớp nhất — xem cột "Từ khóa kích hoạt" ở mục 3 để biết nên nhắc từ nào.
+AI đọc mô tả kỹ thuật (`description`) của từng skill và tự chọn skill khớp nhất — xem cột "Từ khóa kích hoạt" ở mục 3 để biết nên nhắc từ nào. Cách này chậm hơn `/phong-*` một chút (AI phải tự suy luận) nhưng vẫn ra đúng skill nếu mô tả đủ rõ.
 
-**Lần đầu dùng máy mới:** gõ `setup` hoặc "kiểm tra môi trường trước khi soạn văn bản" để AI tự kiểm tra `officecli` đã cài chưa (skill `setup`). Việc này chỉ cần làm 1 lần/máy — các lần sau AI tự nhận ra đã sẵn sàng và bỏ qua bước cài lại.
+**Lần đầu dùng máy mới:** gõ `/setup` hoặc "kiểm tra môi trường trước khi soạn văn bản" để AI tự kiểm tra `officecli` đã cài chưa (skill `setup`). Việc này chỉ cần làm 1 lần/máy — các lần sau AI tự nhận ra đã sẵn sàng và bỏ qua bước cài lại.
 
 ---
 
