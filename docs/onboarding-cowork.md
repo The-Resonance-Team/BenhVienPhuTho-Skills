@@ -23,12 +23,10 @@ Các bước:
 5. Chọn **Send invite** — nhân viên nhận email, làm theo hướng dẫn để tạo tài khoản.
 
 ![Trang Members trên OpenWork Cloud dashboard](../assets/01-member-page.png)
-*Trang **Members**: danh sách thành viên hiện tại, nút **+ Add member** và **Copy install link**.*
+*Trang **Members**: danh sách thành viên hiện tại, nút **+ Add member** và **Copy invite link**.*
 
 ![Form thêm thành viên](../assets/02-add-member.png)
 *Bấm **Add member** hiện form nhập **Email** + **Role**, có **Cancel** / **Send invite**.*
-
-> 💡 Nút **Copy install link** (góc trên bên phải bảng Members) tạo sẵn một link cài đặt gắn với org — có thể gửi kèm email mời để nhân viên tải OpenWork desktop app đúng org ngay từ đầu, thay vì phải tự chọn org thủ công ở bước 3. `setup.ps1` (mục 2) vẫn là cách chính vì nó cài luôn cả Node/Python/OfficeCLI/OpenCode, không chỉ riêng OpenWork.
 
 ### Cách mời theo phòng ban
 
@@ -75,7 +73,7 @@ Sau khi chạy xong, khởi động lại terminal / máy nếu PATH chưa nhậ
 
 Sau khi cài xong, nhân viên mở **OpenWork** từ Start Menu / Desktop shortcut.
 
-1. Bấm **Sign in** (hoặc mở link cài đặt/lời mời từ email) → trình duyệt mở trang đăng nhập OpenWork Cloud.
+1. Mở link mời → trình duyệt mở trang đăng nhập OpenWork Cloud.
 2. Nhập đúng **email đã được mời** ở mục 1 → **Next**.
 3. Trình duyệt xác nhận đăng nhập thành công → hộp thoại hệ điều hành hỏi mở ứng dụng OpenWork → đồng ý (**Mở OpenWork.app**) hoặc bấm **Open OpenWork** trên trang.
 4. Ứng dụng desktop hiện màn hình **Choose your organization** → chọn **Bệnh Viện ĐK Tỉnh Phú Thọ** → **Continue with organization**.
@@ -84,7 +82,7 @@ Sau khi cài xong, nhân viên mở **OpenWork** từ Start Menu / Desktop short
 *Trang "Continue to OpenWork" — nhập đúng email đã được IT Manager mời.*
 
 ![Xác nhận mở ứng dụng desktop](../assets/06-open-to-app.png)
-*Sau khi đăng nhập trên trình duyệt: xác nhận mở OpenWork.app, hoặc dùng "Copy sign-in link"/"Copy code" nếu app không tự mở.*
+*Sau khi đăng nhập trên trình duyệt: xác nhận mở OpenWork.app, hoặc dùng "Copy invite link"/"Copy code" nếu app không tự mở.*
 
 ![Chọn tổ chức](../assets/07-choose-org.png)
 *Chọn đúng **Bệnh Viện ĐK Tỉnh Phú Thọ** trong danh sách tổ chức (có thể thấy nhiều org demo khác nếu tài khoản dùng chung).*
