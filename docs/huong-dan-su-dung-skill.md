@@ -19,6 +19,8 @@ Cách chắc chắn nhất: gõ **lệnh gạch chéo `/phong-<tên phòng>`** n
 | Kế toán dự án | `/phong-ktda` |
 | Vật tư – TBYT | `/phong-vattu` |
 | Tổ chức cán bộ | `/phong-tccb` |
+| Đào tạo | `/phong-dao-tao` |
+| NCKH&HTQT | `/phong-nckh-htqt` |
 
 Ví dụ: `/phong-hcqt soạn tờ trình phê duyệt dự toán và KHLCNT mua văn phòng phẩm quý 3`.
 
@@ -115,6 +117,28 @@ Ví dụ:
 - "Soạn công văn thông báo BHXH về việc thay đổi nhân lực bệnh viện tháng này"
 
 ⚠️ TCCB xử lý **dữ liệu cá nhân nhạy cảm nhất** trong toàn bộ skill (CCCD, sổ BHXH, tài khoản lương, nơi cư trú). AI sẽ luôn hỏi lại các trường này, không tự đoán/lấy từ hồ sơ cũ, và không đưa dữ liệu ra ngoài phiên làm việc (không dán Google Forms/Sheets, cloud, agent ngoài).
+
+### Phòng Đào tạo
+
+**Từ khóa:** Đào tạo, ĐT&CĐT, chỉ đạo tuyến, xác nhận thời gian thực hành, chuyển giao kỹ thuật, thực hành sinh viên, cử cán bộ đi học/đào tạo/hội nghị/hội thảo.
+
+Ví dụ:
+- "Làm giấy xác nhận hoàn thành thời gian thực hành cho một bác sĩ vừa thực hành xong"
+- "Soạn hợp đồng thực hành khám bệnh, chữa bệnh theo Nghị định 96/2023 cho học viên mới nhận"
+- "Soạn quyết định cử cán bộ tham dự khóa đào tạo AI Citizen do tuyến trên tổ chức"
+
+Chỉ 6/9 nhóm nghiệp vụ có mẫu `.docx` thật (chủ yếu nhóm "Xác nhận thời gian thực hành"); 7 nhóm còn lại (sau đại học, đào tạo tuyến dưới, cử cán bộ dự hội nghị/hội thảo/khóa tuyến trên...) AI trả lời bằng bản thảo Markdown đúng thể thức.
+
+### Phòng NCKH&HTQT
+
+**Từ khóa:** NCKH, HTQT, đề tài khoa học, sáng kiến, hội đồng đạo đức, hội nghị, hội thảo, đi nước ngoài, chuyên gia nước ngoài, tập san, thử nghiệm lâm sàng.
+
+Ví dụ:
+- "Soạn kế hoạch nghiên cứu khoa học và sáng kiến năm nay"
+- "Làm công văn xin ý kiến cho một cán bộ đi nước ngoài dự hội nghị chuyên môn"
+- "Soạn quyết định kiện toàn Hội đồng đạo đức trong nghiên cứu y sinh học"
+
+NCKH&HTQT **chưa có mẫu `.docx` runtime nào** (nguồn hồ sơ toàn PDF đã ký, không có mẫu trống) — AI luôn trả lời bằng bản thảo Markdown. ⚠️ Luôn xác nhận số hiệu Luật Khoa học, Công nghệ hiện hành (số 93/2025/QH15) — hồ sơ mẫu cũ của phòng có lẫn trích dẫn luật đã hết hiệu lực (29/2013/QH13).
 
 ---
 

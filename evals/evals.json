@@ -241,6 +241,54 @@
       "prompt": "Draft a quality-incident corrective-action report for a medication error, keeping patient identifiers out of the draft.",
       "expected_output": "Routes to phong-qlcl rather than TCCB; TCCB does not claim ownership of clinical quality/incident workflows.",
       "files": []
+    },
+    {
+      "id": "phong-dao-tao-1",
+      "target_skill": "phong-dao-tao",
+      "should_trigger": true,
+      "prompt": "Issue a work-practice completion confirmation letter for someone who just finished their supervised clinical practice hours, plus the practice-hours contract and the supervisor-assignment decision.",
+      "expected_output": "Uses phong-dao-tao's Nghị định 96/2023-based runtime templates (giay-xac-nhan-thoi-gian-thuc-hanh, hop-dong-thuc-hanh-kbcb, qd-phan-cong-nguoi-huong-dan-thuc-hanh), asks for the practitioner's identity/credential fields instead of fabricating them, keeps the fixed legal-citation paragraphs (Điều 1/2/3, NĐ 96/2023) as literal text rather than merge keys, and stops before the deputy director's signature.",
+      "files": []
+    },
+    {
+      "id": "phong-dao-tao-2",
+      "target_skill": "phong-dao-tao",
+      "should_trigger": true,
+      "prompt": "We're sending three staff to attend an AI-in-healthcare training program at a higher-tier institution — draft the decision assigning them.",
+      "expected_output": "Recognizes this as Nhóm 7 (cử cán bộ tham dự chương trình tuyến trên) which has no blank template — drafts a structured administrative Markdown decision instead of fabricating a .docx layout, asks for the inviting institution's reference letter number and staff identities rather than inventing them.",
+      "files": []
+    },
+    {
+      "id": "phong-dao-tao-3",
+      "target_skill": "phong-dao-tao",
+      "should_trigger": false,
+      "prompt": "Draft the ethics-committee reconstitution decision and the cooperation agreement for a doctor traveling abroad for a scientific conference.",
+      "expected_output": "Routes to phong-nckh-htqt rather than phong-dao-tao; Đào tạo does not own ethics-committee or international-cooperation workflows even though both sit under the same Trung tâm ĐT&CĐT.",
+      "files": []
+    },
+    {
+      "id": "phong-nckh-htqt-1",
+      "target_skill": "phong-nckh-htqt",
+      "should_trigger": true,
+      "prompt": "Draft this year's base-level scientific research topic plan, including the reconstitution decision for the Science and Technology Council.",
+      "expected_output": "Confirms the currently valid Luật Khoa học, Công nghệ và Đổi mới sáng tạo citation (số 93/2025/QH15) rather than copying the superseded 29/2013/QH13 number sometimes found in old source decisions, drafts structured administrative Markdown since no blank .docx template exists, and does not hardcode council membership without confirming the active reconstitution decision.",
+      "files": []
+    },
+    {
+      "id": "phong-nckh-htqt-2",
+      "target_skill": "phong-nckh-htqt",
+      "should_trigger": true,
+      "prompt": "A staff member needs to travel abroad for an academic exchange — draft the hospital's request letter and figure out what approvals are needed.",
+      "expected_output": "Walks the full 3-tier approval chain (Tỉnh ủy → Sở Y tế → UBND tỉnh) instead of stopping at the hospital, asks for the staff member's personal/salary-grade fields instead of fabricating them, and flags that a post-trip result report is still owed once the trip completes.",
+      "files": []
+    },
+    {
+      "id": "phong-nckh-htqt-3",
+      "target_skill": "phong-nckh-htqt",
+      "should_trigger": false,
+      "prompt": "Draft the practice-hours confirmation letter and supervisor-assignment decision for someone finishing their clinical practice period under Nghị định 96/2023.",
+      "expected_output": "Routes to phong-dao-tao rather than phong-nckh-htqt; NCKH&HTQT does not own practice-hours confirmation even though both phòng sit under the same Trung tâm ĐT&CĐT.",
+      "files": []
     }
   ]
 }

@@ -13,7 +13,7 @@ const ROOT = path.resolve(__dirname, "..");
 const skillArg = process.argv.indexOf("--skills");
 const SKILLS = skillArg >= 0 && process.argv[skillArg + 1]
   ? process.argv[skillArg + 1].split(",").filter(Boolean)
-  : ["phong-cntt", "phong-ktda", "phong-hcqt", "phong-dieu-duong", "phong-vattu", "phong-tccb"];
+  : ["phong-cntt", "phong-ktda", "phong-hcqt", "phong-dieu-duong", "phong-vattu", "phong-tccb", "phong-dao-tao"];
 
 function run(command, args, options = {}) {
   return execFileSync(command, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...options });

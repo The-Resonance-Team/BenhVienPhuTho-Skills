@@ -26,6 +26,7 @@ const DEFAULT_SKILLS = [
   "phong-dieu-duong",
   "phong-vattu",
   "phong-tccb",
+  "phong-dao-tao",
 ];
 
 function parseArgs(argv) {

@@ -37,8 +37,12 @@ Mời theo từng đợt, mỗi đợt là một phòng ban (để dễ theo dõ
 - Phòng Quản lý chất lượng (QLCL)
 - Phòng Công nghệ thông tin (CNTT)
 - Phòng Kế toán dự án (KTDA)
+- Phòng Vật tư – TBYT
+- Phòng Tổ chức cán bộ (TCCB)
+- Phòng Đào tạo
+- Phòng NCKH&HTQT
 
-> ⚠️ **Giới hạn nền tảng hiện tại:** OpenWork **chưa hỗ trợ phân quyền skill theo từng phòng/team trong org** (tab **Teams**/**Roles** trên trang Members hiện chỉ nhóm thành viên, chưa điều khiển việc skill/plugin nào hiển thị cho ai). Nghĩa là mọi thành viên được mời — bất kể phòng ban nào — sẽ nhìn thấy **toàn bộ** danh sách skill đã đồng bộ (`phong-hcqt`, `phong-dieu-duong`, `phong-qlcl`, `phong-cntt`, `phong-ktda`, `officecli`...), không chỉ skill của phòng mình. Việc mời theo phòng ban ở trên chỉ phục vụ mục đích theo dõi tiến độ mời, **không** phải cơ chế kiểm soát truy cập. Khi OpenWork bổ sung tính năng phân quyền theo team, cập nhật lại mục này.
+> ⚠️ **Giới hạn nền tảng hiện tại:** OpenWork **chưa hỗ trợ phân quyền skill theo từng phòng/team trong org** (tab **Teams**/**Roles** trên trang Members hiện chỉ nhóm thành viên, chưa điều khiển việc skill/plugin nào hiển thị cho ai). Nghĩa là mọi thành viên được mời — bất kể phòng ban nào — sẽ nhìn thấy **toàn bộ** danh sách skill đã đồng bộ (`phong-hcqt`, `phong-dieu-duong`, `phong-qlcl`, `phong-cntt`, `phong-ktda`, `phong-vattu`, `phong-tccb`, `phong-dao-tao`, `phong-nckh-htqt`, `officecli`...), không chỉ skill của phòng mình. Việc mời theo phòng ban ở trên chỉ phục vụ mục đích theo dõi tiến độ mời, **không** phải cơ chế kiểm soát truy cập. Khi OpenWork bổ sung tính năng phân quyền theo team, cập nhật lại mục này.
 
 ---
 
@@ -142,6 +146,8 @@ Nhân viên **không cần biết khái niệm "skill" hay tên skill**. Chỉ c
 | Quản lý chất lượng (QLCL) | Văn bản QLCL, khảo sát & chỉ số chất lượng, báo cáo sự cố y khoa/an toàn người bệnh, đề án cải tiến chất lượng (PDCA/Lean/FMEA), nội dung đào tạo | "Soạn báo cáo sự cố y khoa tháng này theo mẫu QLCL" |
 | Công nghệ thông tin (CNTT) | Mua sắm thiết bị CNTT, tờ trình dự toán/KHLCNT thiết bị, hợp đồng mua bán thiết bị, biên bản giao nhận TSCĐ | "Soạn tờ trình mua sắm máy chủ mới cho phòng CNTT" |
 | Kế toán dự án (KTDA) | Chỉ định thầu dịch vụ 50–dưới 500 triệu, đơn đề xuất, thư mời báo giá dịch vụ, hợp đồng kinh tế, giấy đề nghị thanh toán | "Soạn đơn đề xuất chỉ định thầu dịch vụ bảo trì thang máy" |
+| Đào tạo (ĐT&CĐT) | Xác nhận thời gian thực hành (NĐ 96/2023), chuyển giao kỹ thuật tuyến dưới, thực hành sinh viên, cử cán bộ đi học/đào tạo/hội nghị | "Làm giấy xác nhận hoàn thành thời gian thực hành cho một bác sĩ vừa thực hành xong" |
+| NCKH&HTQT | Đề tài NCKH, sáng kiến, hội đồng đạo đức, hội nghị/hội thảo, cán bộ đi nước ngoài, tập san, thử nghiệm lâm sàng | "Soạn kế hoạch nghiên cứu khoa học và sáng kiến năm nay" |
 | **Không cần skill nào** | Hỏi đáp thông thường, giải thích, tóm tắt văn bản đã có — không tạo file .docx/.xlsx/.pptx theo mẫu | "Tóm tắt nội dung văn bản này giúp tôi", "Giải thích quy trình X là gì" |
 
 **Lưu ý:** khi tạo file Word/Excel/PowerPoint theo mẫu chính thức của bệnh viện, AI luôn dùng template có sẵn (`officecli merge`) — không tự bịa mẫu mới cho giấy tờ hành chính.
