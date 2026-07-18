@@ -1,0 +1,16 @@
+{
+  "name": "benhvienphutho-skills",
+  "description": "Claude plugin skills cho BVĐK tỉnh Phú Thọ — HCQT, Điều dưỡng, QLCL, CNTT, KTDA, Vật tư, TCCB, Đào tạo, NCKH&HTQT, officecli, setup, grilling.",
+  "version": "1.0.0",
+  "owner": {
+    "name": "BVĐK tỉnh Phú Thọ"
+  },
+  "plugins": [
+    {
+      "name": "benhvienphutho-skills",
+      "source": "./",
+      "description": "Hospital document skills for BVĐK tỉnh Phú Thọ — HCQT, Điều dưỡng, QLCL, CNTT, KTDA, Vật tư, TCCB, Đào tạo, NCKH&HTQT, officecli, setup, and grilling reference.",
+      "version": "1.0.0"
+    }
+  ]
+}
