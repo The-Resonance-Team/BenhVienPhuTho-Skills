@@ -11,7 +11,11 @@
 
 param(
     # Which department's skills to install. Omit for an interactive picker; tooling installs regardless.
-    [string]$Department
+    [string]$Department,
+    # Dir where a previous cloud-sync left ALL skills. When set, removes other departments' phong-* there. Find it in the pilot: npx skills list --agent opencode --global
+    [string]$CleanSkillsDir,
+    # Preview cleanup deletions without removing anything.
+    [switch]$DryRun
 )
 
 $ErrorActionPreference = "Continue"
@@ -20,7 +24,9 @@ $ErrorActionPreference = "Continue"
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "[*] Requesting admin privileges..." -ForegroundColor Yellow
     $fwd = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
-    if ($Department) { $fwd += " -Department `"$Department`"" }
+    if ($Department)     { $fwd += " -Department `"$Department`"" }
+    if ($CleanSkillsDir) { $fwd += " -CleanSkillsDir `"$CleanSkillsDir`"" }
+    if ($DryRun)         { $fwd += " -DryRun" }
     Start-Process powershell -Verb RunAs -ArgumentList $fwd
     exit
 }
@@ -308,6 +314,32 @@ if (-not $Department) {
         Write-Host "  [i] Update later:  npx -y skills@latest update --agent opencode --global" -ForegroundColor DarkGray
     } else {
         Write-Host "  [!] skills install failed (exit $LASTEXITCODE). Check network / repo access." -ForegroundColor Red
+    }
+}
+
+# Optional cleanup: a previous org-wide cloud-sync may have left ALL departments'
+# skills on this machine. When -CleanSkillsDir is given, remove the other phong-*
+# skills there, keeping only this machine's department. Opt-in and whitelisted:
+# only phong-* dirs that contain a SKILL.md, never the chosen department, never
+# common skills (officecli/setup/grilling). -DryRun previews without deleting.
+if ($Department -and $CleanSkillsDir) {
+    if (-not (Test-Path $CleanSkillsDir)) {
+        Write-Host "  [!] -CleanSkillsDir not found: $CleanSkillsDir" -ForegroundColor Red
+    } else {
+        $removed = 0
+        Get-ChildItem -Path $CleanSkillsDir -Directory -Filter "phong-*" -ErrorAction SilentlyContinue | ForEach-Object {
+            if ($_.Name -ne $Department -and (Test-Path (Join-Path $_.FullName "SKILL.md"))) {
+                if ($DryRun) {
+                    Write-Host "  [DRY] would remove other-dept skill: $($_.Name)" -ForegroundColor DarkYellow
+                } else {
+                    Remove-Item $_.FullName -Recurse -Force
+                    Write-Host "  [OK] removed other-dept skill: $($_.Name)" -ForegroundColor Green
+                }
+                $removed++
+            }
+        }
+        $verb = if ($DryRun) { "would remove" } else { "removed" }
+        Write-Host "  [i] Cleanup: $verb $removed other-department skill(s) from $CleanSkillsDir; kept $Department." -ForegroundColor Cyan
     }
 }
 

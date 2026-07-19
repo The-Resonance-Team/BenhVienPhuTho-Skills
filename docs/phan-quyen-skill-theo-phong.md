@@ -102,6 +102,26 @@ npx -y skills@latest update --agent opencode --global
 
 Lệnh kéo bản mới nhất cho các skill đã cài trên máy (chỉ officecli + skill của phòng). Chạy lại `setup.ps1` cũng cập nhật — bước [7/8] `npx skills add` luôn lấy bản mới. Đẩy hàng loạt → đặt lệnh `update` vào scheduled task / login script.
 
+## Dọn skill phòng khác (máy đã đồng bộ cloud trước đó)
+
+Máy từng đồng bộ cloud (trước khi thu hẹp marketplace) vẫn còn **đủ 9 phòng** trong thư mục skill. Thu hẹp marketplace chỉ chặn đẩy **mới** — không xoá bản đã có. Cài dept qua npx chỉ **thêm cạnh** → user vẫn thấy hết.
+
+Dùng `-CleanSkillsDir` để xoá skill phòng khác, giữ lại phòng của máy + skill chung. Tìm thư mục ở bước pilot:
+
+```powershell
+npx -y skills@latest list --agent opencode --global   # xem CLI cài vào đâu; đối chiếu nơi skill cloud cũ nằm
+```
+
+**Chạy thử trước (không xoá gì) — bắt buộc trên máy thật:**
+
+```powershell
+.\setup.ps1 -Department phong-cntt -CleanSkillsDir "<đường-dẫn>" -DryRun
+```
+
+Xem danh sách `[DRY] would remove: phong-...` đúng ý → bỏ `-DryRun` để xoá thật.
+
+An toàn: chỉ xoá thư mục tên `phong-*` **có `SKILL.md`**, không đụng phòng đang chọn, không đụng skill chung (officecli/setup/grilling) hay thư mục lạ.
+
 ## Vì sao không cần tách plugin
 
 Phân quyền diễn ra ở **tầng thư mục trên máy**, không ở tầng plugin. Mỗi máy chỉ có thư mục skill của phòng mình. Không phải tái cấu trúc `marketplace.json` / `plugin.json`. Nếu sau này chuyển sang B2 (cloud phân quyền theo team) thì mới cần tách plugin.
