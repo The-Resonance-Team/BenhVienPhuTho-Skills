@@ -155,21 +155,35 @@ Hỏi quy định, thuật ngữ, so sánh văn bản pháp luật — **luôn k
 - "Giải thích ngưỡng chỉ định thầu theo Luật Đấu thầu hiện hành là bao nhiêu"
 - "So sánh điểm khác nhau giữa Thông tư A và Thông tư B, tôi đính kèm cả hai file"
 - "Quy trình chỉ định thầu dịch vụ 50–dưới 500 triệu gồm những bước nào"
+- "Viên chức nghỉ hưu trước tuổi theo Nghị định 46/2025 được hưởng những chế độ gì, tôi đính kèm nghị định"
+- "Thời gian thực hành để cấp chứng chỉ hành nghề bác sĩ đa khoa theo Nghị định 96/2023 là bao nhiêu tháng"
+- "Tiêu chuẩn kỹ thuật của kim khâu phẫu thuật theo TCVN hoặc ISO hiện hành là gì"
+- "Mức xử phạt vi phạm hành chính trong đấu thầu nếu không đăng tải KHLCNT đúng hạn là bao nhiêu"
 
 ### Tìm kiếm thông tin
 
 - "Tìm giúp tôi trong các file đã đính kèm phần nói về thời hạn nghiệm thu"
 - "Trong đống công văn này, cái nào liên quan đến gói thầu vật tư tháng 6"
+- "Trong hợp đồng tôi đính kèm, điều khoản phạt chậm giao hàng nằm ở điều mấy, nội dung cụ thể là gì"
+- "Tìm trong biên bản họp HĐKH này xem Hội đồng đã thống nhất tiêu chí kỹ thuật nào cho gói băng gạc"
 
 ### Tổng hợp / tóm tắt
 
 - "Tóm tắt nội dung văn bản này giúp tôi"
 - "Gộp 3 báo cáo này thành một bảng so sánh theo tháng"
 - "Tổng hợp các sự cố y khoa trong file Excel này theo khoa, không cần phân tích nguyên nhân"
+- "Tóm tắt biên bản cuộc họp này thành 5 ý chính và danh sách việc cần làm sau họp"
+- "Tổng hợp kết quả khảo sát hài lòng bệnh nhân trong file Excel này: điểm trung bình từng tiêu chí, tiêu chí nào thấp nhất"
+- "Liệt kê tất cả các hạng mục còn thiếu hồ sơ trong bảng danh mục tôi đính kèm"
 
 ### Soạn thảo tự do (không theo mẫu chính thức)
 
 Ghi chú nội bộ, email, dàn ý trình bày, bản nháp chưa cần đúng thể thức hành chính — cứ mô tả yêu cầu bình thường. Khi việc chạm tới **giấy tờ chính thức có mẫu** (tờ trình, quyết định, hợp đồng...), AI sẽ tự chuyển sang skill đúng phòng ban ở mục 3 thay vì tự bịa bố cục.
+
+- "Viết email nhắc nhà thầu nộp hồ sơ bảo hành thiết bị còn thiếu, giọng lịch sự nhưng rõ deadline"
+- "Soạn dàn ý báo cáo sơ kết 6 tháng hoạt động mua sắm của phòng, khoảng 10 phút trình bày"
+- "Tóm tắt nội dung cuộc họp hôm nay thành ghi chú gửi nội bộ, tôi đọc nội dung họp cho bạn nghe"
+- "Dịch đoạn tiếng Anh trong catalogue thiết bị này sang tiếng Việt, tập trung phần thông số kỹ thuật"
 
 ### Lưu ý an toàn khi dùng ngoài luồng skill
 
