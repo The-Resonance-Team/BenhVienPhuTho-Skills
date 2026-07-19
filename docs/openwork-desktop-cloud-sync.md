@@ -1,5 +1,7 @@
 # OpenWork Desktop — Cloud Sync Diagnosis & Fix
 
+> **Dành cho IT Manager / kỹ thuật viên.** Tài liệu này không dành cho nhân viên sử dụng thông thường — chỉ cần khi OpenWork Desktop không đồng bộ được plugin/model với server nội bộ.
+
 ## Problem
 
 OpenWork Desktop (v0.17.30) on macOS and Windows fails to sync plugins and models from the self-hosted OpenWork Cloud on `bvpt` (100.75.4.88).

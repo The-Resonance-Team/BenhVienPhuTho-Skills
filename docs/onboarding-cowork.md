@@ -176,5 +176,5 @@ Nhân viên **không cần biết khái niệm "skill" hay tên skill**. Chỉ c
 
 ## 8. Liên hệ hỗ trợ
 
-- IT Manager / Phòng CNTT: `<điền thông tin liên hệ nội bộ>`
+- IT Manager / Phòng CNTT: `<SĐT/email nội bộ — điền trước khi phát tài liệu cho nhân viên>`
 - OpenWork Cloud: `http://openwork-bvpt.resonance.io.vn`
