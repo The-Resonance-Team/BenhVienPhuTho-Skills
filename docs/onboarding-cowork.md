@@ -43,6 +43,8 @@ Mời theo từng đợt, mỗi đợt là một phòng ban (để dễ theo dõ
 - Phòng NCKH&HTQT
 
 > ⚠️ **Giới hạn nền tảng hiện tại:** OpenWork **chưa hỗ trợ phân quyền skill theo từng phòng/team trong org** (tab **Teams**/**Roles** trên trang Members hiện chỉ nhóm thành viên, chưa điều khiển việc skill/plugin nào hiển thị cho ai). Nghĩa là mọi thành viên được mời — bất kể phòng ban nào — sẽ nhìn thấy **toàn bộ** danh sách skill đã đồng bộ (`phong-hcqt`, `phong-dieu-duong`, `phong-qlcl`, `phong-cntt`, `phong-ktda`, `phong-vattu`, `phong-tccb`, `phong-dao-tao`, `phong-nckh-htqt`, `officecli`...), không chỉ skill của phòng mình. Việc mời theo phòng ban ở trên chỉ phục vụ mục đích theo dõi tiến độ mời, **không** phải cơ chế kiểm soát truy cập. Khi OpenWork bổ sung tính năng phân quyền theo team, cập nhật lại mục này.
+>
+> ✅ **Cách khắc phục hiện có (cài cục bộ theo máy):** xem [phan-quyen-skill-theo-phong.md](./phan-quyen-skill-theo-phong.md) — thu hẹp marketplace cấp org + `setup.ps1 -Department <phòng>` để mỗi máy chỉ có skill của phòng mình.
 
 ---
 
@@ -61,13 +63,18 @@ Các bước script tự làm (không cần can thiệp thủ công):
 5. Cài OfficeCLI (npm → winget → choco → install script).
 6. Cài OpenCode (npm → winget → choco → install script).
 7. Cài OpenWork desktop app — script tự gọi GitHub Releases API (`different-ai/openwork`) để lấy **bản mới nhất**, tải asset `openwork-win-x64-*.exe` tương ứng rồi cài. Không hardcode số phiên bản trong script, nên **không cần sửa `setup.ps1` hay tài liệu này mỗi khi OpenWork ra bản mới** — chỉ cần cập nhật nếu tên repo hoặc quy ước đặt tên asset (`openwork-win-x64-*.exe`) thay đổi.
-8. In tóm tắt phiên bản đã cài (Node, npm, Python, OfficeCLI, OpenCode).
+8. **Chọn phòng ban → cài skill của phòng lên máy đó** (bước [7/8]). Script hiện menu đánh số 9 phòng; gõ số phòng của máy đang cài rồi Enter. Máy chỉ nhận skill của đúng phòng — xem [phan-quyen-skill-theo-phong.md](./phan-quyen-skill-theo-phong.md).
+9. In tóm tắt phiên bản đã cài (Node, npm, Python, OfficeCLI, OpenCode).
 
 Chạy lệnh:
 
 ```powershell
 .\setup.ps1
 ```
+
+Khi menu hiện ra, chọn đúng phòng của máy đang cài (ví dụ CNTT → gõ `4`). Cài hàng loạt bằng script thì bỏ qua menu bằng cách chỉ định thẳng: `.\setup.ps1 -Department phong-cntt`.
+
+> ⚠️ Menu skill chỉ có tác dụng khi marketplace cấp org **không** còn đẩy toàn bộ skill (bước 1 trong [phan-quyen-skill-theo-phong.md](./phan-quyen-skill-theo-phong.md)). Chưa thu hẹp marketplace org → máy vẫn thấy đủ skill dù đã chọn phòng.
 
 Sau khi chạy xong, khởi động lại terminal / máy nếu PATH chưa nhận lệnh mới.
 

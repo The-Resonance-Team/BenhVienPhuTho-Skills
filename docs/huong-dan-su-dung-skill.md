@@ -186,3 +186,5 @@ Ghi chú nội bộ, email, dàn ý trình bày, bản nháp chưa cần đúng 
 | Cần loại giấy tờ chưa có mẫu thật trong hệ thống | AI sẽ báo rõ "chưa có mẫu", đưa bản thảo Markdown tạm và đề nghị bạn cung cấp mẫu `.docx` gốc đã duyệt để thêm vào sau |
 | Số văn bản (`___/QĐ-BV`...) bị để trống | Đúng thiết kế — số do Văn thư cấp, không phải AI tự đánh số |
 | Không chắc phòng ban nào phù hợp với yêu cầu | Cứ mô tả việc cần làm, AI tự xác định qua từ khóa nghiệp vụ; nếu nhầm, nói rõ tên phòng để AI chuyển đúng skill |
+| Máy chỉ thấy skill của phòng mình, không thấy skill phòng khác | **Đúng thiết kế.** Mỗi máy được IT cài đúng skill của phòng đó. Cần dùng skill phòng khác (ví dụ chuyển công tác) → báo IT cài lại. |
+| Không thấy skill nào của phòng mình | Báo IT — máy có thể chưa được cài skill phòng (bước chọn phòng khi cài đặt). |

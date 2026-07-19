@@ -6,20 +6,30 @@
     Checks and installs: Node.js, Python 3.12, OfficeCLI, OpenCode, OpenWork.
     Uses winget -> choco -> direct download fallback chain.
 .NOTES
-    Run: .\scripts\setup.ps1
+    Run: .\setup.ps1 -Department phong-cntt
 #>
+
+param(
+    # Which department's skills to install on this machine. Omit to install tooling only.
+    [string]$Department,
+    # Where OpenCode/OpenWork discovers global skills. Override if OpenWork's embedded OpenCode reads a different dir.
+    [string]$SkillsDir = "$env:USERPROFILE\.config\opencode\skills"
+)
 
 $ErrorActionPreference = "Continue"
 
 # --- Auto-elevate to admin ---
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "[*] Requesting admin privileges..." -ForegroundColor Yellow
-    Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    $fwd = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
+    if ($Department) { $fwd += " -Department `"$Department`"" }
+    if ($SkillsDir)  { $fwd += " -SkillsDir `"$SkillsDir`"" }
+    Start-Process powershell -Verb RunAs -ArgumentList $fwd
     exit
 }
 
 # --- Set Execution Policy for current user ---
-Write-Host "`n[1/7] Setting Execution Policy (CurrentUser)..." -ForegroundColor Cyan
+Write-Host "`n[1/8] Setting Execution Policy (CurrentUser)..." -ForegroundColor Cyan
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
 Write-Host "  [OK] Execution Policy set to RemoteSigned" -ForegroundColor Green
 
@@ -82,9 +92,9 @@ function Get-File {
 }
 
 # ==========================================
-# [2/7] Node.js (npm comes bundled)
+# [2/8] Node.js (npm comes bundled)
 # ==========================================
-Write-Host "`n[2/7] Checking Node.js..." -ForegroundColor Cyan
+Write-Host "`n[2/8] Checking Node.js..." -ForegroundColor Cyan
 if (Test-CommandExists "node") {
     $nodeVer = node --version
     Write-Host "  [SKIP] Node.js $nodeVer already installed" -ForegroundColor DarkGray
@@ -107,9 +117,9 @@ if (Test-CommandExists "node") {
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
 # ==========================================
-# [3/7] Python 3.12
+# [3/8] Python 3.12
 # ==========================================
-Write-Host "`n[3/7] Checking Python 3.12..." -ForegroundColor Cyan
+Write-Host "`n[3/8] Checking Python 3.12..." -ForegroundColor Cyan
 $pythonOk = $false
 if (Test-CommandExists "python") {
     $pyVer = python --version 2>&1
@@ -137,9 +147,9 @@ if (-not $pythonOk) {
 $env:Path = [System.Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path", "User")
 
 # ==========================================
-# [4/7] OfficeCLI
+# [4/8] OfficeCLI
 # ==========================================
-Write-Host "`n[4/7] Checking OfficeCLI..." -ForegroundColor Cyan
+Write-Host "`n[4/8] Checking OfficeCLI..." -ForegroundColor Cyan
 if (Test-CommandExists "officecli") {
     Write-Host "  [SKIP] OfficeCLI already installed" -ForegroundColor DarkGray
 } else {
@@ -169,9 +179,9 @@ if (Test-CommandExists "officecli") {
 }
 
 # ==========================================
-# [5/7] OpenCode
+# [5/8] OpenCode
 # ==========================================
-Write-Host "`n[5/7] Checking OpenCode..." -ForegroundColor Cyan
+Write-Host "`n[5/8] Checking OpenCode..." -ForegroundColor Cyan
 if (Test-CommandExists "opencode") {
     Write-Host "  [SKIP] OpenCode already installed" -ForegroundColor DarkGray
 } else {
@@ -200,9 +210,9 @@ if (Test-CommandExists "opencode") {
 }
 
 # ==========================================
-# [6/7] OpenWork (Desktop App)
+# [6/8] OpenWork (Desktop App)
 # ==========================================
-Write-Host "`n[6/7] Checking OpenWork..." -ForegroundColor Cyan
+Write-Host "`n[6/8] Checking OpenWork..." -ForegroundColor Cyan
 $openworkInstalled = Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |
     Where-Object { $_.DisplayName -like "*OpenWork*" }
 if ($openworkInstalled) {
@@ -230,7 +240,83 @@ if ($openworkInstalled) {
 }
 
 # ==========================================
-# [7/7] Summary
+# [7/8] Department skills (local, per-machine)
+# ==========================================
+Write-Host "`n[7/8] Installing department skills..." -ForegroundColor Cyan
+
+# officecli renders the .docx templates — every department needs it.
+$CommonSkills = @("officecli")
+# slug -> display name shown in the picker (ASCII so it renders on any Windows console / RDP)
+$Departments = [ordered]@{
+    "phong-hcqt"       = "Hanh chinh quan tri (HCQT)"
+    "phong-dieu-duong" = "Dieu duong"
+    "phong-qlcl"       = "Quan ly chat luong (QLCL)"
+    "phong-cntt"       = "Cong nghe thong tin (CNTT)"
+    "phong-ktda"       = "Ke toan du an (KTDA)"
+    "phong-vattu"      = "Vat tu - TBYT"
+    "phong-tccb"       = "To chuc can bo (TCCB)"
+    "phong-dao-tao"    = "Dao tao"
+    "phong-nckh-htqt"  = "NCKH & HTQT"
+}
+$srcRoot = Join-Path $PSScriptRoot "skills"
+
+# Reject an invalid -Department, then fall through to the picker.
+if ($Department -and -not $Departments.Contains($Department)) {
+    Write-Host "  [!] Unknown department '$Department' — pick from the menu below." -ForegroundColor DarkYellow
+    $Department = $null
+}
+
+# No department yet: show an interactive numbered menu.
+if (-not $Department) {
+    if (-not [Environment]::UserInteractive) {
+        Write-Host "  [SKIP] Non-interactive and no -Department. Re-run: .\setup.ps1 -Department phong-cntt" -ForegroundColor DarkYellow
+    } else {
+        $slugs = @($Departments.Keys)
+        Write-Host ""
+        Write-Host "  =====================================================" -ForegroundColor Cyan
+        Write-Host "    Select the department for THIS machine" -ForegroundColor White
+        Write-Host "  =====================================================" -ForegroundColor Cyan
+        for ($i = 0; $i -lt $slugs.Count; $i++) {
+            Write-Host ("   {0,2}. {1,-26} [{2}]" -f ($i + 1), $Departments[$slugs[$i]], $slugs[$i]) -ForegroundColor White
+        }
+        Write-Host "    0. Skip - install tooling only, no skills" -ForegroundColor DarkGray
+        Write-Host "  -----------------------------------------------------" -ForegroundColor Cyan
+        do {
+            $choice = Read-Host "  Enter a number (0-$($slugs.Count))"
+            $n = 0
+            $valid = [int]::TryParse($choice, [ref]$n) -and $n -ge 0 -and $n -le $slugs.Count
+            if (-not $valid) { Write-Host "  [!] Please enter a number between 0 and $($slugs.Count)." -ForegroundColor Red }
+        } until ($valid)
+        if ($n -ge 1) { $Department = $slugs[$n - 1] }
+    }
+}
+
+# Install the chosen department's skills (+ common).
+if (-not $Department) {
+    Write-Host "  [SKIP] No department skills installed." -ForegroundColor DarkYellow
+} elseif (-not (Test-Path $srcRoot)) {
+    Write-Host "  [!] Skills source not found at $srcRoot. Run this script from the repo root." -ForegroundColor Red
+} else {
+    New-Item -ItemType Directory -Force -Path $SkillsDir | Out-Null
+    foreach ($skill in ($CommonSkills + $Department)) {
+        $src = Join-Path $srcRoot $skill
+        $dst = Join-Path $SkillsDir $skill
+        if (-not (Test-Path (Join-Path $src "SKILL.md"))) {
+            Write-Host "  [!] Missing $skill (no SKILL.md at $src)" -ForegroundColor Red
+            continue
+        }
+        if (Test-Path $dst) { Remove-Item $dst -Recurse -Force }
+        Copy-Item $src $dst -Recurse -Force
+        Write-Host "  [OK] $skill -> $dst" -ForegroundColor Green
+    }
+    Write-Host "  [i] Department: $($Departments[$Department]) [$Department]" -ForegroundColor Cyan
+    Write-Host "  [i] This machine has ONLY this department + common skills." -ForegroundColor Cyan
+    Write-Host "  [i] If OpenWork does not list them, its OpenCode may read another dir." -ForegroundColor DarkGray
+    Write-Host "      Override: .\setup.ps1 -Department $Department -SkillsDir '<path>'" -ForegroundColor DarkGray
+}
+
+# ==========================================
+# [8/8] Summary
 # ==========================================
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host " Setup Complete!" -ForegroundColor Green
