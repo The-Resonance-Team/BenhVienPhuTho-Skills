@@ -8,21 +8,18 @@ Nguyên nhân cốt lõi: skill được đóng gói thành **một plugin gộp
 
 ## Giải pháp: B1 — cài skill cục bộ theo máy
 
-Bỏ việc dựa vào cloud để phát skill phòng ban. Thay vào đó **cài skill của đúng phòng lên từng máy**, tận dụng cơ chế có sẵn: OpenCode (nhúng trong OpenWork) **tự quét skill từ thư mục global trên máy**.
+Bỏ việc dựa vào cloud để phát skill phòng ban. Thay vào đó **cài skill của đúng phòng lên từng máy** bằng công cụ chuẩn của hệ sinh thái Agent Skills.
 
-### Cơ chế (đã xác minh — opencode.ai/docs/skills)
+### Cơ chế — skills CLI (`npx skills`, skills.sh)
 
-OpenCode nạp skill từ các thư mục cục bộ trên máy, mỗi skill một thư mục chứa `SKILL.md`:
+`npx skills` hỗ trợ OpenCode; nó kéo skill **từ GitHub** và cài vào đúng thư mục global mà OpenCode (nhúng trong OpenWork) tự quét:
 
-```
-~/.config/opencode/skills/<name>/SKILL.md   ← mặc định script dùng
-~/.claude/skills/<name>/SKILL.md
-~/.agents/skills/<name>/SKILL.md
-```
+- `--agent opencode --global` → CLI **tự** ghi vào thư mục skill global của OpenCode (không phải tự đoán đường dẫn).
+- `--skill officecli --skill <phòng>` → chỉ cài skill chung + skill của phòng, **bỏ 8 phòng còn lại**.
+- `--copy` → copy độc lập (không symlink), bền qua dọn cache; `--yes` chạy không hỏi.
+- Node/npx đã được `setup.ps1` cài ở bước [2/8].
 
-Trên Windows: `%USERPROFILE%\.config\opencode\skills\<name>\SKILL.md`.
-
-`setup.ps1` đã chạy **trên từng máy** do IT Manager thực hiện, và IT **đã biết máy đó thuộc phòng nào** (mời theo đợt từng phòng). Vậy chỉ cần copy `common + <phòng>` vào thư mục trên, bỏ 8 phòng còn lại.
+`setup.ps1` chạy **trên từng máy** do IT thực hiện, IT **biết máy thuộc phòng nào** (mời theo đợt). Vậy chỉ cần chọn phòng khi cài.
 
 ## Hai việc cần làm
 
@@ -73,7 +70,7 @@ Gõ số phòng rồi Enter. Nhập sai → hỏi lại. Chọn `0` = chỉ cài
 .\setup.ps1 -Department phong-cntt
 ```
 
-Cả hai cách: `setup.ps1` copy `officecli` (chung) + skill của phòng vào `%USERPROFILE%\.config\opencode\skills\`, xoá bản cũ nếu có.
+Cả hai cách: `setup.ps1` gọi `npx skills add <repo> --agent opencode --global --copy --skill officecli --skill <phòng>` — kéo bản **mới nhất từ GitHub**, cài đúng officecli + skill của phòng.
 
 Bảng phòng → mã (`-Department`):
 
@@ -91,17 +88,19 @@ Bảng phòng → mã (`-Department`):
 
 ## Cần xác minh trên 1 máy pilot
 
-Điểm chưa chắc duy nhất: **OpenWork nhúng OpenCode có đọc đúng `%USERPROFILE%\.config\opencode\skills` không**, hay app dùng thư mục config riêng (app Electron có thể đặt HOME/config khác). Chạy pilot 1 máy, mở OpenWork, kiểm tra skill của phòng có hiện trong bộ chọn skill không.
+Điểm chưa chắc duy nhất: **OpenWork nhúng OpenCode có đọc đúng thư mục skill global mà `npx skills --agent opencode --global` ghi vào không** (app Electron có thể đặt HOME/config riêng). Chạy pilot 1 máy, mở OpenWork, kiểm tra skill của phòng có hiện trong bộ chọn skill.
 
-Nếu không hiện → tìm thư mục skill thật của OpenWork rồi override:
+Nếu không hiện → xem CLI cài vào đâu bằng `npx skills list --agent opencode --global`, rồi symlink/copy sang thư mục skill thật của OpenWork.
+
+## Cập nhật skill khi có bản mới
+
+Skill đổi trên GitHub → cập nhật máy bằng **một lệnh**, không cần chạy lại toàn bộ setup:
 
 ```powershell
-.\setup.ps1 -Department phong-cntt -SkillsDir "<đường-dẫn-thật>"
+npx -y skills@latest update --agent opencode --global
 ```
 
-## Cập nhật skill về sau
-
-Khi skill trong repo đổi, chạy lại `setup.ps1 -Department <phòng>` trên máy — bước [7/8] xoá và copy đè. (Mất auto-update của cloud, đổi lấy phân quyền — chấp nhận được vì IT vốn chạy setup theo máy. Cần cập nhật hàng loạt thì viết script `-UpdateSkillsOnly` sau.)
+Lệnh kéo bản mới nhất cho các skill đã cài trên máy (chỉ officecli + skill của phòng). Chạy lại `setup.ps1` cũng cập nhật — bước [7/8] `npx skills add` luôn lấy bản mới. Đẩy hàng loạt → đặt lệnh `update` vào scheduled task / login script.
 
 ## Vì sao không cần tách plugin
 

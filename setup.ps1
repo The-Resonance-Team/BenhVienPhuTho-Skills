@@ -10,10 +10,8 @@
 #>
 
 param(
-    # Which department's skills to install on this machine. Omit to install tooling only.
-    [string]$Department,
-    # Where OpenCode/OpenWork discovers global skills. Override if OpenWork's embedded OpenCode reads a different dir.
-    [string]$SkillsDir = "$env:USERPROFILE\.config\opencode\skills"
+    # Which department's skills to install. Omit for an interactive picker; tooling installs regardless.
+    [string]$Department
 )
 
 $ErrorActionPreference = "Continue"
@@ -23,7 +21,6 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     Write-Host "[*] Requesting admin privileges..." -ForegroundColor Yellow
     $fwd = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
     if ($Department) { $fwd += " -Department `"$Department`"" }
-    if ($SkillsDir)  { $fwd += " -SkillsDir `"$SkillsDir`"" }
     Start-Process powershell -Verb RunAs -ArgumentList $fwd
     exit
 }
@@ -244,8 +241,6 @@ if ($openworkInstalled) {
 # ==========================================
 Write-Host "`n[7/8] Installing department skills..." -ForegroundColor Cyan
 
-# officecli renders the .docx templates — every department needs it.
-$CommonSkills = @("officecli")
 # slug -> display name shown in the picker (ASCII so it renders on any Windows console / RDP)
 $Departments = [ordered]@{
     "phong-hcqt"       = "Hanh chinh quan tri (HCQT)"
@@ -258,7 +253,9 @@ $Departments = [ordered]@{
     "phong-dao-tao"    = "Dao tao"
     "phong-nckh-htqt"  = "NCKH & HTQT"
 }
-$srcRoot = Join-Path $PSScriptRoot "skills"
+
+# Repo the skills CLI pulls from (public GitHub).
+$SkillsRepo = "The-Resonance-Team/BenhVienPhuTho-Skills"
 
 # Reject an invalid -Department, then fall through to the picker.
 if ($Department -and -not $Departments.Contains($Department)) {
@@ -291,28 +288,27 @@ if (-not $Department) {
     }
 }
 
-# Install the chosen department's skills (+ common).
+# Install/update the chosen department's skills (+ common officecli) via the skills CLI.
+# Pulls the latest from GitHub into OpenCode's global skills dir. Re-run any time to update.
 if (-not $Department) {
     Write-Host "  [SKIP] No department skills installed." -ForegroundColor DarkYellow
-} elseif (-not (Test-Path $srcRoot)) {
-    Write-Host "  [!] Skills source not found at $srcRoot. Run this script from the repo root." -ForegroundColor Red
+} elseif (-not (Test-CommandExists "npx")) {
+    Write-Host "  [!] npx not found (Node.js step failed?). Cannot install skills." -ForegroundColor Red
 } else {
-    New-Item -ItemType Directory -Force -Path $SkillsDir | Out-Null
-    foreach ($skill in ($CommonSkills + $Department)) {
-        $src = Join-Path $srcRoot $skill
-        $dst = Join-Path $SkillsDir $skill
-        if (-not (Test-Path (Join-Path $src "SKILL.md"))) {
-            Write-Host "  [!] Missing $skill (no SKILL.md at $src)" -ForegroundColor Red
-            continue
-        }
-        if (Test-Path $dst) { Remove-Item $dst -Recurse -Force }
-        Copy-Item $src $dst -Recurse -Force
-        Write-Host "  [OK] $skill -> $dst" -ForegroundColor Green
+    $skillArgs = @(
+        "-y", "skills@latest", "add", $SkillsRepo,
+        "--agent", "opencode", "--global", "--copy", "--yes",
+        "--skill", "officecli", "--skill", $Department
+    )
+    Write-Host "  [*] npx skills add $SkillsRepo --skill officecli --skill $Department" -ForegroundColor Yellow
+    & npx @skillArgs
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "  [OK] Installed: officecli + $Department ($($Departments[$Department]))" -ForegroundColor Green
+        Write-Host "  [i] This machine has ONLY this department + officecli." -ForegroundColor Cyan
+        Write-Host "  [i] Update later:  npx -y skills@latest update --agent opencode --global" -ForegroundColor DarkGray
+    } else {
+        Write-Host "  [!] skills install failed (exit $LASTEXITCODE). Check network / repo access." -ForegroundColor Red
     }
-    Write-Host "  [i] Department: $($Departments[$Department]) [$Department]" -ForegroundColor Cyan
-    Write-Host "  [i] This machine has ONLY this department + common skills." -ForegroundColor Cyan
-    Write-Host "  [i] If OpenWork does not list them, its OpenCode may read another dir." -ForegroundColor DarkGray
-    Write-Host "      Override: .\setup.ps1 -Department $Department -SkillsDir '<path>'" -ForegroundColor DarkGray
 }
 
 # ==========================================
