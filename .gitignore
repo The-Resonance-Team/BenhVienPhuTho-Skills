@@ -1,5 +1,5 @@
 .DS_Store
 *.bak
-
+.omo
 # Private source templates are never runtime assets and must not enter git.
 skills/**/assets/_seed/
