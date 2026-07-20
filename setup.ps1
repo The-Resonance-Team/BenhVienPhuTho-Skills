@@ -265,7 +265,7 @@ $SkillsRepo = "The-Resonance-Team/BenhVienPhuTho-Skills"
 
 # Reject an invalid -Department, then fall through to the picker.
 if ($Department -and -not $Departments.Contains($Department)) {
-    Write-Host "  [!] Unknown department '$Department' — pick from the menu below." -ForegroundColor DarkYellow
+    Write-Host "  [!] Unknown department '$Department' -- pick from the menu below." -ForegroundColor DarkYellow
     $Department = $null
 }
 
