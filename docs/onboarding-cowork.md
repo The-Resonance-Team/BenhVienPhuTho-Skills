@@ -153,6 +153,8 @@ Nhân viên **không cần biết khái niệm "skill" hay tên skill**. Chỉ c
 | Quản lý chất lượng (QLCL) | Văn bản QLCL, khảo sát & chỉ số chất lượng, báo cáo sự cố y khoa/an toàn người bệnh, đề án cải tiến chất lượng (PDCA/Lean/FMEA), nội dung đào tạo | "Soạn báo cáo sự cố y khoa tháng này theo mẫu QLCL" |
 | Công nghệ thông tin (CNTT) | Mua sắm thiết bị CNTT, tờ trình dự toán/KHLCNT thiết bị, hợp đồng mua bán thiết bị, biên bản giao nhận TSCĐ | "Soạn tờ trình mua sắm máy chủ mới cho phòng CNTT" |
 | Kế toán dự án (KTDA) | Chỉ định thầu dịch vụ 50–dưới 500 triệu, đơn đề xuất, thư mời báo giá dịch vụ, hợp đồng kinh tế, giấy đề nghị thanh toán | "Soạn đơn đề xuất chỉ định thầu dịch vụ bảo trì thang máy" |
+| Vật tư – TBYT | Mua sắm vật tư y tế, chào giá trực tuyến, E-TBMT, KHLCNT/KQLCNT, hợp đồng kinh tế mua bán hàng hóa, Hội đồng khoa học | "Soạn chủ trương mua sắm băng ghim và dụng cụ cắt khâu nối" |
+| Tổ chức cán bộ (TCCB) | Nghỉ hưu, sổ BHXH, chứng chỉ hành nghề, xác nhận công tác, thay đổi nhân lực | "Soạn quyết định nghỉ hưu để hưởng chế độ BHXH cho một viên chức" |
 | Đào tạo (ĐT&CĐT) | Xác nhận thời gian thực hành (NĐ 96/2023), chuyển giao kỹ thuật tuyến dưới, thực hành sinh viên, cử cán bộ đi học/đào tạo/hội nghị | "Làm giấy xác nhận hoàn thành thời gian thực hành cho một bác sĩ vừa thực hành xong" |
 | NCKH&HTQT | Đề tài NCKH, sáng kiến, hội đồng đạo đức, hội nghị/hội thảo, cán bộ đi nước ngoài, tập san, thử nghiệm lâm sàng | "Soạn kế hoạch nghiên cứu khoa học và sáng kiến năm nay" |
 | **Không cần skill nào** | Hỏi đáp thông thường, giải thích, tóm tắt văn bản đã có — không tạo file .docx/.xlsx/.pptx theo mẫu | "Tóm tắt nội dung văn bản này giúp tôi", "Giải thích quy trình X là gì" |

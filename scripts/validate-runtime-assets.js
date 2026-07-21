@@ -43,7 +43,7 @@ function parseArgs(argv) {
 
 async function runJson(args) {
   try {
-    const result = await execFileAsync(OFFICECLI, args, { encoding: "utf8", maxBuffer: 4 * 1024 * 1024 });
+    const result = await execFileAsync(OFFICECLI, args, { encoding: "utf8", maxBuffer: 4 * 1024 * 1024, shell: true });
     return JSON.parse(result.stdout);
   } catch (error) {
     try {

@@ -19,11 +19,31 @@ function run(command, args, options = {}) {
   return execFileSync(command, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...options });
 }
 
+function isWin32() {
+  return process.platform === "win32";
+}
+
+function unzipFile(source, dest) {
+  if (isWin32()) {
+    run("powershell", ["-Command", `Expand-Archive -Path '${source}' -DestinationPath '${dest}' -Force`]);
+  } else {
+    run("unzip", ["-q", source, "-d", dest]);
+  }
+}
+
+function zipDir(source, dest, cwd) {
+  if (isWin32()) {
+    run("powershell", ["-Command", `Compress-Archive -Path '${path.join(cwd, '*')}' -DestinationPath '${dest}' -Force`]);
+  } else {
+    run("zip", ["-q", "-0", "-X", "-r", dest, "."], { cwd });
+  }
+}
+
 function normalizeFile(file) {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bv-runtime-normalize-"));
   const staged = `${file}.normalized-${process.pid}`;
   try {
-    run("unzip", ["-q", file, "-d", tempRoot]);
+    unzipFile(file, tempRoot);
     const wordRoot = path.join(tempRoot, "word");
     for (const name of fs.readdirSync(wordRoot).filter((entry) => entry.endsWith(".xml"))) {
       const xmlFile = path.join(wordRoot, name);
@@ -31,7 +51,7 @@ function normalizeFile(file) {
     }
     // Store entries without recompressing large Office packages. This avoids
     // platform-specific ZIP corruption while preserving the normalized XML.
-    run("zip", ["-q", "-0", "-X", "-r", staged, "."], { cwd: tempRoot });
+    zipDir(staged, staged, tempRoot);
     fs.renameSync(staged, file);
   } finally {
     if (fs.existsSync(staged)) fs.rmSync(staged, { force: true });

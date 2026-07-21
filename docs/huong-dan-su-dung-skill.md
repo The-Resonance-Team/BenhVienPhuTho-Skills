@@ -2,7 +2,7 @@
 
 Tài liệu cho **nhân viên các phòng ban** BVĐK tỉnh Phú Thọ dùng trợ lý AI (OpenWork/Claude) để soạn giấy tờ. Không cần biết khái niệm "skill" — chỉ cần gõ đúng từ khóa phòng ban + việc cần làm, AI tự chọn đúng mẫu.
 
-Muốn biết cách cài đặt máy trạm, đăng nhập OpenWork, chọn workspace: xem [`onboarding-cowork.md`](onboarding-cowork.md). Tài liệu này chỉ tập trung **cách gọi đúng skill và ví dụ câu gõ** cho cả 7 phòng ban hiện có.
+Muốn biết cách cài đặt máy trạm, đăng nhập OpenWork, chọn workspace: xem [`onboarding-cowork.md`](onboarding-cowork.md). Tài liệu này chỉ tập trung **cách gọi đúng skill và ví dụ câu gõ** cho cả 9 phòng ban hiện có.
 
 ---
 
@@ -129,7 +129,7 @@ Ví dụ:
 - "Soạn hợp đồng thực hành khám bệnh, chữa bệnh theo Nghị định 96/2023 cho học viên mới nhận"
 - "Soạn quyết định cử cán bộ tham dự khóa đào tạo AI Citizen do tuyến trên tổ chức"
 
-Chỉ 6/9 nhóm nghiệp vụ có mẫu `.docx` tích hợp sẵn (chủ yếu nhóm "Xác nhận thời gian thực hành"); 7 nhóm còn lại (sau đại học, đào tạo tuyến dưới, cử cán bộ dự hội nghị/hội thảo/khóa tuyến trên...) AI trả lời bằng văn bản soạn sẵn đúng thể thức, bạn copy dán vào mẫu Word của phòng.
+Chỉ 6/9 nhóm nghiệp vụ có mẫu `.docx` tích hợp sẵn (chủ yếu nhóm "Xác nhận thời gian thực hành"); 3 nhóm còn lại (sau đại học, đào tạo tuyến dưới, cử cán bộ dự hội nghị/hội thảo/khóa tuyến trên...) AI trả lời bằng văn bản soạn sẵn đúng thể thức, bạn copy dán vào mẫu Word của phòng.
 
 ### Phòng NCKH&HTQT
 
