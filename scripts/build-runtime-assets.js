@@ -126,12 +126,39 @@ function run(command, commandArgs, options = {}) {
   return childProcess.execFileSync(command, commandArgs, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"], ...options });
 }
 
+function isWin32() {
+  return process.platform === "win32";
+}
+
+function unzipFile(source, dest) {
+  if (isWin32()) {
+    run("powershell", ["-Command", `Expand-Archive -Path '${source}' -DestinationPath '${dest}' -Force`]);
+  } else {
+    run("unzip", ["-q", source, "-d", dest]);
+  }
+}
+
+function chmodRecursive(dir) {
+  if (!isWin32()) {
+    run("chmod", ["-R", "u+rwX", dir]);
+  }
+  // On Windows, files created by Node.js already have appropriate permissions.
+}
+
+function zipDir(dest, cwd) {
+  if (isWin32()) {
+    run("powershell", ["-Command", `Compress-Archive -Path '${path.join(cwd, '*')}' -DestinationPath '${dest}' -Force`]);
+  } else {
+    run("zip", ["-q", "-X", "-r", dest, "."], { cwd });
+  }
+}
+
 function copySanitizedDocx(source, output) {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "benhvienphutho-template-"));
   const stagedOutput = `${output}.staged-${process.pid}`;
   try {
-    run("unzip", ["-q", source, "-d", tempRoot]);
-    run("chmod", ["-R", "u+rwX", tempRoot]);
+    unzipFile(source, tempRoot);
+    chmodRecursive(tempRoot);
     const wordRoot = path.join(tempRoot, "word");
     const xmlFiles = fs.existsSync(wordRoot)
       ? fs.readdirSync(wordRoot).filter((name) => name.endsWith(".xml"))
@@ -143,7 +170,7 @@ function copySanitizedDocx(source, output) {
     }
     fs.mkdirSync(path.dirname(output), { recursive: true });
     if (!dryRun) {
-      run("zip", ["-q", "-X", "-r", stagedOutput, "."], { cwd: tempRoot });
+      zipDir(stagedOutput, tempRoot);
       const issues = validateOutput(stagedOutput);
       if (issues.length && !skipValidation) fail(`${path.basename(source)}: ${issues.join(", ")}`);
       fs.renameSync(stagedOutput, output);
@@ -156,7 +183,9 @@ function copySanitizedDocx(source, output) {
 }
 
 function validateOutput(file) {
-  const xml = run("unzip", ["-p", file, "word/document.xml"]);
+  const xml = isWin32()
+    ? run("powershell", ["-Command", `((Expand-Archive -Path '${file}' -DestinationPath '${path.join(os.tmpdir(), "bv-validate-" + process.pid)}' -PassThru | Get-ChildItem -Recurse -Filter 'document.xml' | Select-Object -First 1).FullName | Get-Content -Raw)`])
+    : run("unzip", ["-p", file, "word/document.xml"]);
   const textNodes = [...xml.matchAll(/<w:(?:t|delText|instrText)(?: [^>]*)?>([\s\S]*?)<\/w:(?:t|delText|instrText)>/gu)]
     .map((match) => match[1]);
   const plain = textNodes.join(" ").replace(/&amp;/g, "&").replace(/\s+/gu, " ");
