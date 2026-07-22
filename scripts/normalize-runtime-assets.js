@@ -25,7 +25,7 @@ function isWin32() {
 
 function unzipFile(source, dest) {
   if (isWin32()) {
-    run("powershell", ["-Command", `Expand-Archive -Path '${source}' -DestinationPath '${dest}' -Force`]);
+    run("tar", ["-xf", source, "-C", dest]);
   } else {
     run("unzip", ["-q", source, "-d", dest]);
   }
@@ -33,10 +33,17 @@ function unzipFile(source, dest) {
 
 function zipDir(source, dest, cwd) {
   if (isWin32()) {
-    run("powershell", ["-Command", `Compress-Archive -Path '${path.join(cwd, '*')}' -DestinationPath '${dest}' -Force`]);
+    run("tar", ["-cf", dest, "--format=zip", "-C", cwd, "."]);
   } else {
     run("zip", ["-q", "-0", "-X", "-r", dest, "."], { cwd });
   }
+}
+
+function safeRmSync(target) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try { fs.rmSync(target, { force: true, recursive: true }); return; } catch { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200); }
+  }
+  fs.rmSync(target, { force: true, recursive: true });
 }
 
 function normalizeFile(file) {
@@ -52,10 +59,11 @@ function normalizeFile(file) {
     // Store entries without recompressing large Office packages. This avoids
     // platform-specific ZIP corruption while preserving the normalized XML.
     zipDir(staged, staged, tempRoot);
+    safeRmSync(file);
     fs.renameSync(staged, file);
   } finally {
-    if (fs.existsSync(staged)) fs.rmSync(staged, { force: true });
-    fs.rmSync(tempRoot, { recursive: true, force: true });
+    if (fs.existsSync(staged)) safeRmSync(staged);
+    safeRmSync(tempRoot);
   }
 }
 

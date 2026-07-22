@@ -128,6 +128,8 @@ Workspace là **thư mục trên máy** mà OpenWork được phép đọc/tạo
 2. Bấm **Select folder** → chọn hoặc tạo một thư mục cố định để lưu tài liệu công việc (ví dụ `Documents\OpenWork`).
 3. (Tuỳ chọn) đặt tên project để nhóm phiên làm việc trong Analytics.
 4. Bấm **Create Workspace**.
+5. Vào **Settings** (góc dưới trái) → nhóm **Global** → **AI Providers**.
+6. Trong khối **Cloud providers**, tìm provider **local** (model AI nội bộ của bệnh viện) trong danh sách **Available** → bấm **Import** để đưa model vào workspace vừa tạo.
 
 ![Chọn loại workspace](../assets/09-choose-workspace.png)
 *Modal **Create Workspace**: chọn **Local workspace** cho máy trạm nhân viên thường.*
@@ -136,9 +138,17 @@ Workspace là **thư mục trên máy** mà OpenWork được phép đọc/tạo
 *Chưa chọn thư mục — bấm **Select folder**. OpenWork sẽ đọc/tạo/sửa mọi file trong thư mục này.*
 
 ![Đã chọn thư mục, sẵn sàng tạo workspace](../assets/11-create-workspace.png)
-*Sau khi chọn thư mục (ví dụ đường dẫn trên máy nhân viên), bấm **Create Workspace** để hoàn tất.*
+*Sau khi chọn thư mục (ví dụ đường dẫn trên máy nhân viên), bấm **Create Workspace**. Workspace được tạo xong — tiếp tục kết nối AI Provider theo 2 bước dưới đây.*
+
+![Trang AI Providers của workspace, provider local sẵn sàng để import](../assets/13-ai-providers-available.png)
+*Vào **Settings → AI Providers**: khối **Cloud providers → Available** liệt kê provider **local** (model nội bộ) kèm nút **Import**.*
+
+![Provider local đã được import vào workspace](../assets/14-ai-providers-imported.png)
+*Sau khi bấm **Import**: provider **local** chuyển sang khối **Imported**, số "providers connected" tăng lên — model nội bộ đã sẵn sàng dùng trong workspace này.*
 
 > 💡 Khuyên dùng **một thư mục cố định theo phòng ban** (không đổi qua lại) để nhân viên luôn biết file được tạo/sửa nằm ở đâu, và để backup/sao lưu đơn giản hơn.
+>
+> ⚠️ **Import provider là thao tác theo từng workspace:** mỗi khi tạo **workspace mới**, lặp lại bước 5–6 (**Settings → AI Providers → Import** provider **local**). Bỏ qua bước này thì workspace mới sẽ không thấy model nội bộ trong bộ chọn model, dù tổ chức đã được cấp tài nguyên (mục 4).
 
 ---
 

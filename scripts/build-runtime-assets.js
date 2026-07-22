@@ -132,7 +132,7 @@ function isWin32() {
 
 function unzipFile(source, dest) {
   if (isWin32()) {
-    run("powershell", ["-Command", `Expand-Archive -Path '${source}' -DestinationPath '${dest}' -Force`]);
+    run("tar", ["-xf", source, "-C", dest]);
   } else {
     run("unzip", ["-q", source, "-d", dest]);
   }
@@ -145,9 +145,16 @@ function chmodRecursive(dir) {
   // On Windows, files created by Node.js already have appropriate permissions.
 }
 
+function safeRmSync(target) {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try { fs.rmSync(target, { force: true, recursive: true }); return; } catch { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200); }
+  }
+  fs.rmSync(target, { force: true, recursive: true });
+}
+
 function zipDir(dest, cwd) {
   if (isWin32()) {
-    run("powershell", ["-Command", `Compress-Archive -Path '${path.join(cwd, '*')}' -DestinationPath '${dest}' -Force`]);
+    run("tar", ["-cf", dest, "--format=zip", "-C", cwd, "."]);
   } else {
     run("zip", ["-q", "-X", "-r", dest, "."], { cwd });
   }
@@ -173,19 +180,30 @@ function copySanitizedDocx(source, output) {
       zipDir(stagedOutput, tempRoot);
       const issues = validateOutput(stagedOutput);
       if (issues.length && !skipValidation) fail(`${path.basename(source)}: ${issues.join(", ")}`);
+      safeRmSync(output);
       fs.renameSync(stagedOutput, output);
     }
     return xmlFiles.length;
   } finally {
-    if (fs.existsSync(stagedOutput)) fs.rmSync(stagedOutput, { force: true });
-    fs.rmSync(tempRoot, { recursive: true, force: true });
+    if (fs.existsSync(stagedOutput)) safeRmSync(stagedOutput);
+    safeRmSync(tempRoot);
   }
 }
 
 function validateOutput(file) {
-  const xml = isWin32()
-    ? run("powershell", ["-Command", `((Expand-Archive -Path '${file}' -DestinationPath '${path.join(os.tmpdir(), "bv-validate-" + process.pid)}' -PassThru | Get-ChildItem -Recurse -Filter 'document.xml' | Select-Object -First 1).FullName | Get-Content -Raw)`])
-    : run("unzip", ["-p", file, "word/document.xml"]);
+  let xml;
+  if (isWin32()) {
+    const tmpDir = path.join(os.tmpdir(), "bv-validate-" + process.pid);
+    fs.mkdirSync(tmpDir, { recursive: true });
+    try {
+      run("tar", ["-xf", file, "-C", tmpDir]);
+      xml = fs.readFileSync(path.join(tmpDir, "word", "document.xml"), "utf8");
+    } finally {
+      safeRmSync(tmpDir);
+    }
+  } else {
+    xml = run("unzip", ["-p", file, "word/document.xml"]);
+  }
   const textNodes = [...xml.matchAll(/<w:(?:t|delText|instrText)(?: [^>]*)?>([\s\S]*?)<\/w:(?:t|delText|instrText)>/gu)]
     .map((match) => match[1]);
   const plain = textNodes.join(" ").replace(/&amp;/g, "&").replace(/\s+/gu, " ");

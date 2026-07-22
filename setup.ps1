@@ -3,10 +3,12 @@
 .SYNOPSIS
     Dev environment setup script for Windows.
 .DESCRIPTION
-    Checks and installs: Node.js, Python 3.12, OfficeCLI, OpenCode, OpenWork.
-    Uses winget -> choco -> direct download fallback chain.
+    Full mode: checks and installs Node.js, Python 3.12, OfficeCLI, OpenCode, OpenWork,
+    then installs department skills. Uses winget -> choco -> direct download fallback chain.
+    Skill-only mode (-SkillOnly): skips tooling, only installs department skills via npx.
 .NOTES
-    Run: .\setup.ps1 -Department phong-cntt
+    Full:  .\setup.ps1 -Department phong-cntt
+    Skill: .\setup.ps1 -SkillOnly -Department phong-cntt
 #>
 
 param(
@@ -15,32 +17,43 @@ param(
     # Dir where a previous cloud-sync left ALL skills. When set, removes other departments' phong-* there. Find it in the pilot: npx skills list --agent opencode --global
     [string]$CleanSkillsDir,
     # Preview cleanup deletions without removing anything.
-    [switch]$DryRun
+    [switch]$DryRun,
+    # Skip tooling installation (Node, Python, OfficeCLI, OpenCode, OpenWork). Only install department skills.
+    [switch]$SkillOnly
 )
 
 $ErrorActionPreference = "Continue"
 
-# --- Auto-elevate to admin ---
-if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+# --- Auto-elevate to admin (skip in SkillOnly mode — no system installs needed) ---
+if (-not $SkillOnly -and -not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "[*] Requesting admin privileges..." -ForegroundColor Yellow
     $fwd = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
     if ($Department)     { $fwd += " -Department `"$Department`"" }
     if ($CleanSkillsDir) { $fwd += " -CleanSkillsDir `"$CleanSkillsDir`"" }
     if ($DryRun)         { $fwd += " -DryRun" }
+    if ($SkillOnly)      { $fwd += " -SkillOnly" }
     Start-Process powershell -Verb RunAs -ArgumentList $fwd
     exit
 }
 
-# --- Set Execution Policy for current user ---
-Write-Host "`n[1/8] Setting Execution Policy (CurrentUser)..." -ForegroundColor Cyan
-Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
-Write-Host "  [OK] Execution Policy set to RemoteSigned" -ForegroundColor Green
+# ==========================================
+# Tooling installation — skipped in SkillOnly mode
+# ==========================================
 
 # --- Helper: Check command exists ---
 function Test-CommandExists {
     param([string]$Command)
     $null -ne (Get-Command $Command -ErrorAction SilentlyContinue)
 }
+
+if ($SkillOnly) {
+    Write-Host "`n[*] SkillOnly mode -- skipping tooling installation (Node, Python, OfficeCLI, OpenCode, OpenWork)" -ForegroundColor Yellow
+} else {
+
+# --- Set Execution Policy for current user ---
+Write-Host "`n[1/8] Setting Execution Policy (CurrentUser)..." -ForegroundColor Cyan
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned -Force
+Write-Host "  [OK] Execution Policy set to RemoteSigned" -ForegroundColor Green
 
 # --- Helper: Try winget install ---
 function Install-Winget {
@@ -242,10 +255,14 @@ if ($openworkInstalled) {
     }
 }
 
+} # end tooling block
+
 # ==========================================
-# [7/8] Department skills (local, per-machine)
+# Department skills (local, per-machine)
 # ==========================================
-Write-Host "`n[7/8] Installing department skills..." -ForegroundColor Cyan
+$skillStep = if ($SkillOnly) { "1" } else { "7" }
+$toolStep  = if ($SkillOnly) { "1" } else { "8" }
+Write-Host "`n[$skillStep/$toolStep] Installing department skills..." -ForegroundColor Cyan
 
 # slug -> display name shown in the picker (ASCII so it renders on any Windows console / RDP)
 $Departments = [ordered]@{
@@ -344,29 +361,35 @@ if ($Department -and $CleanSkillsDir) {
 }
 
 # ==========================================
-# [8/8] Summary
+# Summary
 # ==========================================
 Write-Host "`n========================================" -ForegroundColor Cyan
 Write-Host " Setup Complete!" -ForegroundColor Green
 Write-Host "========================================" -ForegroundColor Cyan
 
-Write-Host "`nInstalled tools:" -ForegroundColor White
-$snapshots = @(
-    @{ Name = "Node.js"; Cmd = "node"; Arg = "--version" },
-    @{ Name = "npm"; Cmd = "npm"; Arg = "--version" },
-    @{ Name = "Python"; Cmd = "python"; Arg = "--version" },
-    @{ Name = "OfficeCLI"; Cmd = "officecli"; Arg = "--version" },
-    @{ Name = "OpenCode"; Cmd = "opencode"; Arg = "--version" }
-)
+if (-not $SkillOnly) {
+    Write-Host "`nInstalled tools:" -ForegroundColor White
+    $snapshots = @(
+        @{ Name = "Node.js"; Cmd = "node"; Arg = "--version" },
+        @{ Name = "npm"; Cmd = "npm"; Arg = "--version" },
+        @{ Name = "Python"; Cmd = "python"; Arg = "--version" },
+        @{ Name = "OfficeCLI"; Cmd = "officecli"; Arg = "--version" },
+        @{ Name = "OpenCode"; Cmd = "opencode"; Arg = "--version" }
+    )
 
-foreach ($tool in $snapshots) {
-    if (Test-CommandExists $tool.Cmd) {
-        $ver = & $tool.Cmd $tool.Arg 2>&1 | Select-Object -First 1
-        Write-Host "  [OK] $($tool.Name): $ver" -ForegroundColor Green
-    } else {
-        Write-Host "  [--] $($tool.Name): not found" -ForegroundColor DarkYellow
+    foreach ($tool in $snapshots) {
+        if (Test-CommandExists $tool.Cmd) {
+            $ver = & $tool.Cmd $tool.Arg 2>&1 | Select-Object -First 1
+            Write-Host "  [OK] $($tool.Name): $ver" -ForegroundColor Green
+        } else {
+            Write-Host "  [--] $($tool.Name): not found" -ForegroundColor DarkYellow
+        }
     }
+
+    Write-Host "`nOpenWork: Check Start Menu or Desktop shortcut" -ForegroundColor Green
+} else {
+    Write-Host "`nSkill-only mode: tooling not installed." -ForegroundColor Yellow
+    Write-Host "  [i] Update later:  npx -y skills@latest update --agent opencode --global" -ForegroundColor DarkGray
 }
 
-Write-Host "`nOpenWork: Check Start Menu or Desktop shortcut" -ForegroundColor Green
 Write-Host "`nDone. You may need to restart your terminal for PATH changes." -ForegroundColor Cyan
