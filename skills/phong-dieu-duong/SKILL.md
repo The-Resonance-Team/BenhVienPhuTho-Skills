@@ -64,6 +64,14 @@ Giống `phong-hcqt`: chỉ cần `officecli` trên PATH (skill `setup`) và đ�
 | Các vị trí điền                     | `references/placeholders.md`                    |
 | Sửa `.docx` người dùng gửi         | `officecli set <file> <path> --prop text=...`   |
 
+## Officecli guardrails
+
+- **Ưu tiên officecli** cho mọi thao tác .docx/.xlsx/.pptx
+- Library khác (python-docx, openpyxl) **được phép** nếu officecli không cover được case
+- Nếu `officecli validate` fail → chạy `node scripts/validate-template.js <file>` để biết lỗi cụ thể → báo lỗi cho developer
+- Kiểm tra `officecli --version` mỗi session trước khi dùng
+- **KHÔNG dùng** `textutil -convert docx` — tạo zip có `./` prefix + relationship rỗng, dùng `libreoffice --headless --convert-to docx` thay thế
+
 ## Cổng bắt buộc (bắt buộc — không oneshot)
 
 **Cấm merge** cho đến khi đã thu thập đủ trường tối thiểu qua hội thoại.

@@ -17,6 +17,14 @@ Skill theo phòng **Đào tạo**, thuộc **Trung tâm Đào tạo và Chỉ đ
 
 Chi tiết nguồn, quy trình dựng (`textutil -convert docx` cho 4 file `.doc` cũ + `build-runtime-assets.js` + đặt tên field thủ công), và giới hạn kỹ thuật (khối Căn cứ pháp lý, phiếu khảo sát chỉ templatize khối định danh): `assets/README.md`. Danh mục field đầy đủ theo từng template: `references/dao-tao-truong-mau.md`. Văn bản pháp lý tham chiếu đầy đủ (số hiệu/ngày/áp dụng cho nhóm nào): `references/dao-tao-can-cu-phap-ly.md` — mỗi dòng "Căn cứ:" trong mục "Nhánh chưa có mẫu" bên dưới là bản rút gọn, tra cứu chi tiết ở file này trước khi trích dẫn.
 
+## Officecli guardrails
+
+- **Ưu tiên officecli** cho mọi thao tác .docx/.xlsx/.pptx
+- Library khác (python-docx, openpyxl) **được phép** nếu officecli không cover được case
+- Nếu `officecli validate` fail → chạy `node scripts/validate-template.js <file>` để biết lỗi cụ thể → báo lỗi cho developer
+- Kiểm tra `officecli --version` mỗi session trước khi dùng
+- **KHÔNG dùng** `textutil -convert docx` — tạo zip có `./` prefix + relationship rỗng, dùng `libreoffice --headless --convert-to docx` thay thế
+
 ## Cổng bắt buộc (áp dụng mọi nhánh — cả template thật lẫn Markdown)
 
 Phòng Đào tạo là phòng **đầu tiên trong repo có cả 2 lớp dữ liệu nhạy cảm cùng lúc**: dữ liệu cá nhân người thực hành/học viên (như TCCB) VÀ dữ liệu hợp đồng/tài chính đối tác (như HCQT/KTDA) ở Nhóm 1 (Chuyển giao kỹ thuật) và Nhóm 4 (thực hành sinh viên).

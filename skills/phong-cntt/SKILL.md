@@ -15,6 +15,14 @@ Skill theo phòng **CNTT**, phủ toàn bộ chu trình mua sắm/LCNT một gó
 
 14 template này được chuyển đổi từ **một hồ sơ mua sắm thật đã hoàn tất** (không phải mẫu trống của bệnh viện, khác `phong-hcqt`/`phong-dieu-duong`). Toàn bộ dữ liệu thật của vụ việc gốc — tên người, tên/địa chỉ/MST/SĐT/tài khoản nhà thầu, MST/tài khoản Bệnh viện, số hợp đồng, ngày tháng tham chiếu, đơn giá và mã hàng từng dòng trong bảng danh mục hàng hoá — đã được xoá và thay bằng `{{KEY}}` hoặc `___`, xác minh bằng quét lại toàn bộ 14 file (không còn tên riêng/số tài khoản/MST/giá trị hợp đồng thật nào sau khi build). Danh mục field đầy đủ theo từng template: `references/cntt-truong-mau.md`.
 
+## Officecli guardrails
+
+- **Ưu tiên officecli** cho mọi thao tác .docx/.xlsx/.pptx
+- Library khác (python-docx, openpyxl) **được phép** nếu officecli không cover được case
+- Nếu `officecli validate` fail → chạy `node scripts/validate-template.js <file>` để biết lỗi cụ thể → báo lỗi cho developer
+- Kiểm tra `officecli --version` mỗi session trước khi dùng
+- **KHÔNG dùng** `textutil -convert docx` — tạo zip có `./` prefix + relationship rỗng, dùng `libreoffice --headless --convert-to docx` thay thế
+
 ## Cổng bắt buộc (áp dụng mọi template)
 
 - **Không bịa** `TEN_NHA_THAU`, `MA_SO_THUE_NCC`, `TK_NHA_THAU`, số QĐ/HĐ, ngày tham chiếu văn bản khác nếu người dùng chưa cung cấp.

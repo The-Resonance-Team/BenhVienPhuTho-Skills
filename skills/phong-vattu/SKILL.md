@@ -15,6 +15,14 @@ Skill theo phòng **Vật tư – TBYT**, phủ chu trình mua sắm hàng hoá 
 
 12 template này chuyển đổi từ **một hồ sơ mua sắm THẬT đã hoàn tất** (gói "Mua sắm băng ghim và dụng cụ cắt khâu nối..."), không phải mẫu trống — cùng cách tiếp cận đã dùng ở `phong-cntt` (khác `phong-hcqt`/`phong-dieu-duong` seed từ mẫu trống). Toàn bộ dữ liệu thật của vụ việc gốc — tên người (Giám đốc, Trưởng phòng Vật tư, Kế toán trưởng, Tổ trưởng TCG, Chủ tịch/Thư ký HĐKH, ~26 thành viên HĐKH, ~36 thành viên TCG, đại diện nhà thầu), MST/tài khoản/điện thoại/fax của cả Bệnh viện và nhà thầu, số quyết định/tờ trình/hợp đồng và ngày tháng tham chiếu nội bộ chu trình, đơn giá/mã hàng/tên hàng hoá từng dòng — đã được xoá và thay bằng `{{KEY}}` hoặc để trắng, xác minh bằng quét lại toàn bộ 12 file (không còn tên riêng/số tài khoản/MST/giá trị hợp đồng thật). Danh mục field đầy đủ theo từng template: `references/vattu-truong-mau.md`. Trạng thái convert + giới hạn kỹ thuật (6/12 file nguồn `.doc` convert bằng `textutil` do môi trường build không có LibreOffice — phụ lục bảng của 6 file này bị làm phẳng thành đoạn văn): `assets/README.md`.
 
+## Officecli guardrails
+
+- **Ưu tiên officecli** cho mọi thao tác .docx/.xlsx/.pptx
+- Library khác (python-docx, openpyxl) **được phép** nếu officecli không cover được case
+- Nếu `officecli validate` fail → chạy `node scripts/validate-template.js <file>` để biết lỗi cụ thể → báo lỗi cho developer
+- Kiểm tra `officecli --version` mỗi session trước khi dùng
+- **KHÔNG dùng** `textutil -convert docx` — tạo zip có `./` prefix + relationship rỗng, dùng `libreoffice --headless --convert-to docx` thay thế
+
 ## Cổng bắt buộc (áp dụng mọi template)
 
 - **Không bịa** `TEN_NHA_THAU`, `MA_SO_THUE_NCC`, `TK_NCC`, số QĐ/HĐ/tờ trình, ngày tham chiếu văn bản khác, `SO_ETBMT` nếu người dùng chưa cung cấp.

@@ -28,6 +28,14 @@ Các mảng khác của TCCB (Báo cáo, Kế hoạch, Quy chế, Quyết địn
 
 Danh mục field đầy đủ theo từng template: `references/tccb-truong-mau.md`. Trạng thái convert + giới hạn kỹ thuật: `assets/README.md`.
 
+## Officecli guardrails
+
+- **Ưu tiên officecli** cho mọi thao tác .docx/.xlsx/.pptx
+- Library khác (python-docx, openpyxl) **được phép** nếu officecli không cover được case
+- Nếu `officecli validate` fail → chạy `node scripts/validate-template.js <file>` để biết lỗi cụ thể → báo lỗi cho developer
+- Kiểm tra `officecli --version` mỗi session trước khi dùng
+- **KHÔNG dùng** `textutil -convert docx` — tạo zip có `./` prefix + relationship rỗng, dùng `libreoffice --headless --convert-to docx` thay thế
+
 ## Cổng bắt buộc (áp dụng mọi template — không oneshot)
 
 - **Không bịa dữ liệu cá nhân**: `{{HO_TEN}}`, CCCD, số sổ BHXH, số tài khoản, số điện thoại, ngày sinh, nơi sinh, nơi cư trú, địa chỉ liên hệ nếu người dùng chưa cung cấp. Đây là dữ liệu cá nhân theo Nghị định 13/2023/NĐ-CP — sai lệch có thể ảnh hưởng quyền lợi BHXH thật của viên chức.

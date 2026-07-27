@@ -15,6 +15,14 @@ Skill theo phòng **KTDA**, phủ chu trình **chỉ định thầu DỊCH VỤ 
 
 Chuyển đổi từ **mẫu chỉ định thầu DỊCH VỤ chính thức của bệnh viện** (mẫu trống, không phải một vụ việc đã điền thật). Mẫu gốc có sẵn thông tin định danh/tài chính của Bệnh viện (MST, 2 số tài khoản Kho bạc, tài khoản Vietcombank, điện thoại) và tên người đang giữ chức Giám đốc/Kế toán trưởng in cứng trong khối căn cứ/chữ ký — đã thay bằng `{{KEY}}`, theo đúng nguyên tắc "luôn hỏi, không hardcode" đã dùng ở `phong-cntt` (dữ liệu tài chính/định danh đơn vị và người giữ chức vụ có thể đổi). Địa chỉ/pháp lý công khai giữ nguyên. Trường đầy đủ theo từng template: `references/ktda-truong-mau.md`.
 
+## Officecli guardrails
+
+- **Ưu tiên officecli** cho mọi thao tác .docx/.xlsx/.pptx
+- Library khác (python-docx, openpyxl) **được phép** nếu officecli không cover được case
+- Nếu `officecli validate` fail → chạy `node scripts/validate-template.js <file>` để biết lỗi cụ thể → báo lỗi cho developer
+- Kiểm tra `officecli --version` mỗi session trước khi dùng
+- **KHÔNG dùng** `textutil -convert docx` — tạo zip có `./` prefix + relationship rỗng, dùng `libreoffice --headless --convert-to docx` thay thế
+
 ## Cổng bắt buộc (áp dụng mọi template)
 
 - **Không bịa** `TEN_NHA_THAU`, `MA_SO_THUE_NCC`, `TK_NHA_THAU`, số QĐ/HĐ/tờ trình nếu người dùng chưa cung cấp.

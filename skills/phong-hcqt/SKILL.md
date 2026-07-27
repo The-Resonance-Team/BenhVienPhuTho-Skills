@@ -257,6 +257,14 @@ Mỗi runtime template: các trường thân bài đã được sanitize và có
 | Văn thư QT-02                       | `references/hcqt-quy-trinh-van-ban.md`                                         |
 | Khung tờ trình (markdown tham khảo) | `references/mau-to-trinh-mua-sam.md` — **xuất file vẫn qua `officecli merge`** |
 
+## Officecli guardrails
+
+- **Ưu tiên officecli** cho mọi thao tác .docx/.xlsx/.pptx
+- Library khác (python-docx, openpyxl) **được phép** nếu officecli không cover được case
+- Nếu `officecli validate` fail → chạy `node scripts/validate-template.js <file>` để biết lỗi cụ thể → báo lỗi cho developer
+- Kiểm tra `officecli --version` mỗi session trước khi dùng
+- **KHÔNG dùng** `textutil -convert docx` — tạo zip có `./` prefix + relationship rỗng, dùng `libreoffice --headless --convert-to docx` thay thế
+
 ## Cổng bắt buộc (bắt buộc — không oneshot)
 
 **Cấm sinh / giao file** cho đến khi:
