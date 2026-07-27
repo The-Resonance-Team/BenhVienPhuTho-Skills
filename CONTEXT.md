@@ -61,3 +61,33 @@ node scripts/validate-runtime-assets.js --skills <slug>
 3. Thêm eval case (mục 3).
 4. Cập nhật cả 3 file docs (mục 4).
 5. Chạy lại `node scripts/validate-runtime-assets.js` (không tham số) — xác nhận skill mới xuất hiện trong log audit toàn repo.
+
+## Ngôn ngữ chung — Template workflow
+
+**Template**:
+File `.docx` trong `assets/` chứa `{{PLACEHOLDER}}` tokens, được dùng làm mẫu để sinh văn bản thật.
+_Avoid_: document, file, mẫu (dùng "template" để tránh nhầm với "mẫu chuẩn BHXH")
+
+**Runtime template**:
+Template đã qua sanitize — giữ lại placeholder, đã xoá dữ liệu cá nhân thật.
+_Avoid_: raw template, source template
+
+**Merge**:
+Quy trình điền giá trị thật vào placeholder, sinh file `.docx` output bằng `officecli merge`.
+_Avoid_: fill, populate, generate
+
+**Validate**:
+Chạy `officecli validate` để kiểm tra cấu trúc OpenXML. Nếu fail → template bị lỗi (thường do `textutil` convert), phải fix trước khi commit.
+_Avoid_: check, verify (dùng "validate" cho consistency với officecli)
+
+**Pre-commit gate**:
+Git hook chạy `scripts/validate-template.js` trên các file `.docx` staged, block commit nếu template lỗi.
+_Avoid_: commit hook, git hook (dùng "pre-commit gate" để rõ loại)
+
+**textutil**:
+Công cụ macOS convert `.doc` → `.docx`. **KHÔNG DÙNG** — tạo zip có `./` prefix + relationship rỗng, bị officecli reject.
+_Avoid_: macOS convert (dùng "textutil" để cảnh báo rõ)
+
+**LibreOffice headless**:
+Cách đúng để convert `.doc` → `.docx`: `libreoffice --headless --convert-to docx input.doc --outdir output/`
+_Avoid_: libreoffice (luôn ghi đầy đủ "LibreOffice headless" để phân biệt với GUI)

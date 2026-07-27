@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+#
+# Pre-commit hook: validate .docx/.xlsx/.pptx templates before commit.
+# Blocks commit if any staged template fails officecli validate.
+#
+# Install:
+#   cp scripts/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+#
+# Or symlink:
+#   ln -sf ../../scripts/pre-commit .git/hooks/pre-commit
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+VALIDATE="$SCRIPT_DIR/validate-template.js"
+
+# Get staged template files
+TEMPLATES=$(git diff --cached --name-only --diff-filter=ACM -- '*.docx' '*.xlsx' '*.pptx' 2>/dev/null || true)
+
+if [ -z "$TEMPLATES" ]; then
+  exit 0
+fi
+
+echo "Validating staged templates..."
+node "$VALIDATE" $TEMPLATES
