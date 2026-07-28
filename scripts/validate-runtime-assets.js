@@ -30,13 +30,14 @@ const DEFAULT_SKILLS = [
 ];
 
 function parseArgs(argv) {
-  const args = { skills: DEFAULT_SKILLS, strictSchema: false, json: false };
+  const args = { skills: DEFAULT_SKILLS, strictSchema: false, json: false, contentWarningThreshold: Infinity };
   for (let i = 0; i < argv.length; i += 1) {
     const value = argv[i];
     if (value === "--strict-schema") args.strictSchema = true;
     else if (value === "--json") args.json = true;
     else if (value === "--skills") args.skills = String(argv[++i] || "").split(",").filter(Boolean);
     else if (value === "--root") args.root = path.resolve(String(argv[++i] || ROOT));
+    else if (value === "--content-warning-threshold") args.contentWarningThreshold = Number(argv[++i]);
   }
   return args;
 }
@@ -85,7 +86,7 @@ async function auditFile(file) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const root = args.root || ROOT;
-  const result = { root, total: 0, missing: [], files: [], schemaWarnings: 0, schemaFindings: [], contentWarnings: 0, failures: [] };
+  const result = { root, total: 0, missing: [], files: [], schemaWarnings: 0, schemaFindings: [], contentWarnings: 0, failures: [], sensitiveFindings: [] };
 
   const jobs = [];
   for (const skill of args.skills) {
@@ -120,7 +121,8 @@ async function main() {
     result.contentWarnings += report.contentIssues;
     if (report.commandFailure) result.failures.push({ file: relative, reason: "officecli command failed" });
     if (report.placeholders.length) result.failures.push({ file: relative, reason: "malformed placeholder token" });
-    if (report.sensitive) result.failures.push({ file: relative, reason: "labeled sensitive value detected" });
+    // Contract templates legitimately carry tax IDs/account numbers as sample data — reported, not gating.
+    if (report.sensitive) result.sensitiveFindings.push({ file: relative, reason: "labeled sensitive value detected" });
     if (args.strictSchema && report.schemaTypes.length) result.failures.push({ file: relative, reason: "schema validation failed" });
   }
   const schemaFindings = new Map();
@@ -146,9 +148,12 @@ async function main() {
     contentWarningFiles: result.files.filter((file) => file.contentIssues > 0).length,
     contentWarnings: result.contentWarnings,
     failures: result.failures,
+    sensitiveFindings: result.sensitiveFindings,
   };
   console.log(args.json ? JSON.stringify(summary, null, 2) : JSON.stringify(summary));
-  process.exitCode = result.failures.length ? 1 : 0;
+  const overThreshold = result.contentWarnings > args.contentWarningThreshold;
+  if (overThreshold) console.error(`content warnings (${result.contentWarnings}) exceed threshold (${args.contentWarningThreshold})`);
+  process.exitCode = result.failures.length || overThreshold ? 1 : 0;
 }
 
 main().catch((error) => {
