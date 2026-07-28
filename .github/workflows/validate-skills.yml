@@ -29,7 +29,35 @@ jobs:
         run: npm install -g officecli
 
       - name: Validate runtime assets
-        run: node scripts/validate-runtime-assets.js
+        run: |
+          OUTPUT=$(node scripts/validate-runtime-assets.js 2>&1)
+          echo "$OUTPUT"
+          
+          # Parse JSON and check for failures
+          FAILURES=$(echo "$OUTPUT" | grep -o '"failures":\[[^]]*\]' | grep -o '"file"' | wc -l)
+          CONTENT_WARNINGS=$(echo "$OUTPUT" | grep -o '"contentWarnings":[0-9]*' | grep -o '[0-9]*')
+          SCHEMA_WARNINGS=$(echo "$OUTPUT" | grep -o '"schemaWarningFiles":[0-9]*' | grep -o '[0-9]*')
+          
+          echo ""
+          echo "=== Validation Summary ==="
+          echo "Failures: $FAILURES"
+          echo "Content warnings: $CONTENT_WARNINGS"
+          echo "Schema warnings: $SCHEMA_WARNINGS"
+          
+          # Fail if there are any failures
+          if [ "$FAILURES" -gt 0 ]; then
+            echo "FAIL: $FAILURES files have validation failures"
+            exit 1
+          fi
+          
+          # Fail if content warnings exceed threshold
+          THRESHOLD=50
+          if [ "$CONTENT_WARNINGS" -gt "$THRESHOLD" ]; then
+            echo "FAIL: $CONTENT_WARNINGS content warnings exceed threshold ($THRESHOLD)"
+            exit 1
+          fi
+          
+          echo "PASS: Validation passed"
         shell: bash
 
       - name: Normalize runtime assets
@@ -83,15 +111,25 @@ jobs:
           for f in skills/*/assets/*.docx; do
             if [ -f "$f" ]; then
               # Try to validate with officecli
-              if ! officecli validate "$f" > /dev/null 2>&1; then
-                echo "WARN: officecli validate failed - $f"
-                # Don't fail on validation warnings, only on complete failures
+              VALIDATE_OUTPUT=$(officecli validate "$f" 2>&1)
+              if echo "$VALIDATE_OUTPUT" | grep -q "error"; then
+                echo "FAIL: officecli validation error - $f"
+                echo "  $VALIDATE_OUTPUT" | head -3
+                FAIL=1
               fi
               
               # Try to read text
               if ! officecli view "$f" text > /dev/null 2>&1; then
                 echo "FAIL: officecli view text failed - $f"
                 FAIL=1
+              fi
+              
+              # Check content issues
+              ISSUES=$(officecli view "$f" issues --type content --json 2>/dev/null)
+              ISSUE_COUNT=$(echo "$ISSUES" | grep -o '"count":[0-9]*' | grep -o '[0-9]*' || echo "0")
+              
+              if [ "$ISSUE_COUNT" -gt 10 ]; then
+                echo "WARN: $ISSUE_COUNT content issues - $f"
               fi
               
               echo "OK: $f"
