@@ -55,10 +55,19 @@ function zipDir(dest, cwd) {
 }
 
 function safeRmSync(target) {
-  for (let attempt = 0; attempt < 5; attempt++) {
-    try { fs.rmSync(target, { force: true, recursive: true }); return; } catch { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200); }
+  // Windows can hold a transient exclusive lock (AV scan, indexer) right
+  // after a file is read, so EBUSY/EPERM here needs real backoff, not a
+  // couple of quick retries.
+  const maxAttempts = 20;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    try {
+      fs.rmSync(target, { force: true, recursive: true });
+      return;
+    } catch (error) {
+      if (attempt === maxAttempts - 1) throw error;
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 250);
+    }
   }
-  fs.rmSync(target, { force: true, recursive: true });
 }
 
 function normalizeFile(file) {
