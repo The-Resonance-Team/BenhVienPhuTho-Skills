@@ -26,7 +26,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install officecli
-        run: npm install -g officecli
+        run: npm install -g @officecli/officecli
 
       - name: Validate runtime assets
         run: node scripts/validate-runtime-assets.js --content-warning-threshold 80
@@ -92,7 +92,7 @@ jobs:
           node-version: 20
 
       - name: Install officecli
-        run: npm install -g officecli
+        run: npm install -g @officecli/officecli
 
       - name: Generate test output
         run: |
