@@ -23,12 +23,20 @@ function isWin32() {
   return process.platform === "win32";
 }
 
+// Git Bash's own `tar` on PATH is MSYS2's GNU tar, which can't read or write
+// ZIP archives at all ("This does not look like a tar archive"). Windows'
+// built-in System32\tar.exe is libarchive/bsdtar and handles ZIP fine, so
+// call it by absolute path rather than trust PATH resolution order.
+function windowsTar() {
+  return path.join(process.env.SystemRoot || "C:\\Windows", "System32", "tar.exe");
+}
+
 function unzipFile(source, dest) {
   if (isWin32()) {
-    // Windows' bsdtar reads an absolute "D:\..." archive path as ssh-style
-    // host:path remote syntax because of the drive-letter colon. Running
-    // from the file's own directory and passing a relative name sidesteps it.
-    run("tar", ["-xf", path.basename(source), "-C", dest], { cwd: path.dirname(source) });
+    // bsdtar reads an absolute "D:\..." archive path as ssh-style host:path
+    // remote syntax because of the drive-letter colon. Running from the
+    // file's own directory and passing a relative name sidesteps it.
+    run(windowsTar(), ["-xf", path.basename(source), "-C", dest], { cwd: path.dirname(source) });
   } else {
     run("unzip", ["-q", source, "-d", dest]);
   }
@@ -40,7 +48,7 @@ function zipDir(dest, cwd) {
     // OOXML part resolution ([Content_Types].xml is no longer an exact
     // match). Archiving the top-level entries by name avoids the prefix.
     const entries = fs.readdirSync(cwd);
-    run("tar", ["-cf", path.basename(dest), "--format=zip", "-C", cwd, ...entries], { cwd: path.dirname(dest) });
+    run(windowsTar(), ["-cf", path.basename(dest), "--format=zip", "-C", cwd, ...entries], { cwd: path.dirname(dest) });
   } else {
     run("zip", ["-q", "-0", "-X", "-r", dest, "."], { cwd });
   }
