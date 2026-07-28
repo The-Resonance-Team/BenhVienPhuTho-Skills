@@ -28,6 +28,15 @@ jobs:
       - name: Install officecli
         run: npm install -g @officecli/officecli
 
+      - name: Debug shell tool availability
+        run: |
+          echo "unzip: $(command -v unzip || echo 'not found')"
+          echo "zip: $(command -v zip || echo 'not found')"
+          echo "tar: $(command -v tar || echo 'not found')"
+          tar --version || true
+        shell: bash
+        continue-on-error: true
+
       - name: Validate runtime assets
         run: node scripts/validate-runtime-assets.js --content-warning-threshold 80
         shell: bash

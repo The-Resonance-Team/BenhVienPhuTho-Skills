@@ -4,7 +4,6 @@
 // touching text content or importing any source documents.
 
 const fs = require("fs");
-const os = require("os");
 const path = require("path");
 const { execFileSync } = require("child_process");
 const { normalizeOpenXml } = require("./openxml-normalize");
@@ -31,63 +30,61 @@ function windowsTar() {
   return path.join(process.env.SystemRoot || "C:\\Windows", "System32", "tar.exe");
 }
 
-function unzipFile(source, dest) {
+// bsdtar reads an archive path with a drive-letter colon ("D:\...") as
+// ssh-style host:path remote syntax. Passing the archive name relative to
+// the subprocess's own cwd sidesteps that; workDir must not be a directory
+// anything else needs to unlink from (see normalizeFile).
+function unzipFile(archivePath, extractTo, workDir) {
   if (isWin32()) {
-    // bsdtar reads an absolute "D:\..." archive path as ssh-style host:path
-    // remote syntax because of the drive-letter colon. Running from the
-    // file's own directory and passing a relative name sidesteps it.
-    run(windowsTar(), ["-xf", path.basename(source), "-C", dest], { cwd: path.dirname(source) });
+    run(windowsTar(), ["-xf", path.relative(workDir, archivePath), "-C", extractTo], { cwd: workDir });
   } else {
-    run("unzip", ["-q", source, "-d", dest]);
+    run("unzip", ["-q", archivePath, "-d", extractTo]);
   }
 }
 
-function zipDir(dest, cwd) {
+function zipDir(archivePath, sourceDir, workDir) {
   if (isWin32()) {
     // Archiving "." makes bsdtar prefix every entry with "./", which breaks
     // OOXML part resolution ([Content_Types].xml is no longer an exact
     // match). Archiving the top-level entries by name avoids the prefix.
-    const entries = fs.readdirSync(cwd);
-    run(windowsTar(), ["-cf", path.basename(dest), "--format=zip", "-C", cwd, ...entries], { cwd: path.dirname(dest) });
+    const entries = fs.readdirSync(sourceDir);
+    run(windowsTar(), ["-cf", path.relative(workDir, archivePath), "--format=zip", "-C", sourceDir, ...entries], { cwd: workDir });
   } else {
-    run("zip", ["-q", "-0", "-X", "-r", dest, "."], { cwd });
+    run("zip", ["-q", "-0", "-X", "-r", archivePath, "."], { cwd: sourceDir });
   }
 }
 
 function safeRmSync(target) {
-  // Windows can hold a transient exclusive lock (AV scan, indexer) right
-  // after a file is read, so EBUSY/EPERM here needs real backoff, not a
-  // couple of quick retries.
-  const maxAttempts = 20;
-  for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    try {
-      fs.rmSync(target, { force: true, recursive: true });
-      return;
-    } catch (error) {
-      if (attempt === maxAttempts - 1) throw error;
-      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 250);
-    }
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try { fs.rmSync(target, { force: true, recursive: true }); return; } catch { Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 200); }
   }
+  fs.rmSync(target, { force: true, recursive: true });
 }
 
 function normalizeFile(file) {
-  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "bv-runtime-normalize-"));
-  const staged = `${file}.normalized-${process.pid}`;
+  // Kept on the same drive as `file` (unlike os.tmpdir(), which is a
+  // different drive on GitHub's Windows runners and would make the final
+  // rename fail with EXDEV), but never the assets directory itself — a
+  // subprocess's cwd is held open on Windows, and that directory is where
+  // `file` is about to be unlinked from.
+  const workRoot = fs.mkdtempSync(path.join(ROOT, ".bv-runtime-normalize-"));
+  const extractRoot = path.join(workRoot, "extract");
+  const staged = path.join(workRoot, "staged.docx");
   try {
-    unzipFile(file, tempRoot);
-    const wordRoot = path.join(tempRoot, "word");
+    fs.mkdirSync(extractRoot);
+    unzipFile(file, extractRoot, workRoot);
+    const wordRoot = path.join(extractRoot, "word");
     for (const name of fs.readdirSync(wordRoot).filter((entry) => entry.endsWith(".xml"))) {
       const xmlFile = path.join(wordRoot, name);
       fs.writeFileSync(xmlFile, normalizeOpenXml(fs.readFileSync(xmlFile, "utf8")));
     }
     // Store entries without recompressing large Office packages. This avoids
     // platform-specific ZIP corruption while preserving the normalized XML.
-    zipDir(staged, tempRoot);
+    zipDir(staged, extractRoot, workRoot);
     safeRmSync(file);
     fs.renameSync(staged, file);
   } finally {
-    if (fs.existsSync(staged)) safeRmSync(staged);
-    safeRmSync(tempRoot);
+    safeRmSync(workRoot);
   }
 }
 
