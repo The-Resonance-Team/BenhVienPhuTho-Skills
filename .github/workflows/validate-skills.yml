@@ -139,28 +139,43 @@ jobs:
         run: |
           echo "=== Checking skill structure ==="
           FAIL=0
-          
+
           SKILLS=$(for d in skills/phong-*/; do basename "$d"; done)
-          
+
+          # These skills are markdown-only by design (documented in their own
+          # SKILL.md): their source material is already-signed records or
+          # legal text with no blank template to convert, so they have no
+          # assets/*.docx runtime and never will.
+          MARKDOWN_ONLY_SKILLS=("phong-qlcl" "phong-nckh-htqt")
+
           for skill in $SKILLS; do
             echo "Checking $skill..."
-            
+            is_markdown_only=0
+            for m in "${MARKDOWN_ONLY_SKILLS[@]}"; do
+              [ "$skill" = "$m" ] && is_markdown_only=1
+            done
+
             # Check SKILL.md exists
             if [ ! -f "skills/$skill/SKILL.md" ]; then
               echo "FAIL: Missing SKILL.md - $skill"
               FAIL=1
             fi
-            
+
+            if [ "$is_markdown_only" -eq 1 ]; then
+              echo "OK: $skill (markdown-only skill, no runtime docx/xlsx expected)"
+              continue
+            fi
+
             # Check assets directory exists
             if [ ! -d "skills/$skill/assets" ]; then
               echo "FAIL: Missing assets/ - $skill"
               FAIL=1
             fi
-            
+
             # Check for .docx or .xlsx files
             docx_count=$(find "skills/$skill/assets" -name "*.docx" 2>/dev/null | wc -l)
             xlsx_count=$(find "skills/$skill/assets" -name "*.xlsx" 2>/dev/null | wc -l)
-            
+
             if [ "$docx_count" -eq 0 ] && [ "$xlsx_count" -eq 0 ]; then
               echo "FAIL: No .docx or .xlsx files - $skill"
               FAIL=1
