@@ -19,7 +19,7 @@ Nguồn: một hồ sơ mua sắm **THẬT đã hoàn tất** của Phòng Vật
 | `19.Hop dong VTHC.docx` | `hop-dong-vattu.docx` | 49 (⚠️ file nhạy cảm nhất — định danh/tài chính cả 2 bên) |
 | `12.Mẫu số 02A. PHẠM VI CUNG CẤP HÀNG HÓA Bang ghim.xlsx` | `pham-vi-cung-cap-hang-hoa.xlsx` | 0 (mẫu MPI chuẩn, dữ liệu hàng hoá đã xoá — điền tay theo hướng dẫn có sẵn trong sheet) |
 
-`.doc` gốc convert sang `.docx` bằng `textutil -convert docx` (không có LibreOffice trong môi trường build — xem "Giới hạn kỹ thuật" bên dưới).
+`.doc` gốc convert sang `.docx` bằng `libreoffice --headless --convert-to docx` (đã cài LibreOffice ngày 2026-07-28). Tất cả 11 file `.docx` đều có bảng thật, dùng được `officecli get/set` theo đường dẫn `/body/tbl[N]/tr[R]/tc[C]`.
 
 ## Chưa có / không convert
 
@@ -29,11 +29,10 @@ Không convert (không phải mẫu thư/quyết định do bệnh viện soạn
 
 ## Giới hạn kỹ thuật cần biết trước khi sửa tiếp các template `.doc` gốc
 
-Môi trường build này **không có LibreOffice** (`soffice`/`libreoffice` not found), khác quy trình đã dùng ở `phong-hcqt` (`soffice --headless --convert-to docx`). 6 file nguồn `.doc` (`qd-phe-duyet-chu-truong-vattu`, `qd-phe-duyet-danh-muc-tckt`, `qd-phe-duyet-khlcnt-vattu`, `bb-hop-tcg-xay-hscg`, `to-trinh-kqlcnt-vattu`, `qd-phe-duyet-kqlcnt-vattu`) được convert bằng `textutil -convert docx` (built-in macOS) thay thế — kết quả:
+Môi trường build này **có LibreOffice** (`soffice` v26.2.5 — đã cài ngày 2026-07-28). Tất cả 6 file nguồn `.doc` đã được convert lại bằng `soffice --headless --convert-to docx` thay vì `textutil`, khắc phục hoàn toàn lỗi bảng bị làm phẳng.
 
-- **Bảng bị làm phẳng thành đoạn văn**: các phụ lục dạng bảng (danh mục hàng hoá, KHLCNT) trong nguồn `.doc` mất cấu trúc `<w:tbl>` khi qua `textutil` — nội dung phụ lục trong 6 file này là văn bản đã gộp cột, **không phải bảng Word thật** như ở 5 file nguồn `.docx` (`bb-hop-hdkh-danh-muc-tckt`, `bb-hop-tcg-du-toan-khlcnt`, `qd-phe-duyet-nhiem-vu-du-toan`, `to-trinh-khlcnt-vattu`, `hop-dong-vattu`) và `pham-vi-cung-cap-hang-hoa.xlsx`, nơi bảng phụ lục vẫn là bảng thật (dùng được `officecli get/set` theo đường dẫn `/body/tbl[N]/tr[R]/tc[C]` — xem `../references/vattu-truong-mau.md`).
-- **`officecli validate` báo lỗi schema** trên cả 6 file này (ban đầu do `<w:sz-cs>` thay vì `<w:szCs>` — đã sửa; còn lại là thứ tự phần tử con trong `<w:rPr>` không đúng chuẩn OOXML). **Đã kiểm chứng `officecli get`/`set`/`merge` vẫn hoạt động đúng** bất chấp các cảnh báo này (test merge thực tế, xem log phiên làm việc) — chỉ `validate` phàn nàn, không chặn pipeline.
-- Khuyến nghị: nếu có LibreOffice, convert lại 6 file `.doc` gốc theo đúng quy trình `phong-hcqt` để có bảng thật + schema sạch.
+- **Tất cả 11 file `.docx` đều có bảng thật**: dùng được `officecli get/set` theo đường dẫn `/body/tbl[N]/tr[R]/tc[C]`.
+- **Lưu ý**: LibreOffice convert tạo file có schema validation warnings (thứ tự phần tử con trong `<w:rPr>`, `<w:tblLook>`) — đã kiểm chứng không ảnh hưởng `get`/`set`/`merge`.
 
 ## Ghi chú kỹ thuật khác
 
