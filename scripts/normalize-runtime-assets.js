@@ -22,24 +22,23 @@ function isWin32() {
   return process.platform === "win32";
 }
 
-// Git Bash's own `tar` on PATH is MSYS2's GNU tar, which can't read or write
-// ZIP archives at all ("This does not look like a tar archive"). Windows'
-// built-in System32\tar.exe is libarchive/bsdtar and handles ZIP fine, so
-// call it by absolute path rather than trust PATH resolution order.
-function windowsTar() {
-  return path.join(process.env.SystemRoot || "C:\\Windows", "System32", "tar.exe");
+// unzip is present on Git Bash on windows-latest as well as Linux/macOS
+// runners (confirmed via CI diagnostic), so extraction needs no branch.
+function unzipFile(archivePath, extractTo) {
+  run("unzip", ["-q", archivePath, "-d", extractTo]);
 }
 
-// bsdtar reads an archive path with a drive-letter colon ("D:\...") as
-// ssh-style host:path remote syntax. Passing the archive name relative to
-// the subprocess's own cwd sidesteps that; workDir must not be a directory
-// anything else needs to unlink from (see normalizeFile).
-function unzipFile(archivePath, extractTo, workDir) {
-  if (isWin32()) {
-    run(windowsTar(), ["-xf", path.relative(workDir, archivePath), "-C", extractTo], { cwd: workDir });
-  } else {
-    run("unzip", ["-q", archivePath, "-d", extractTo]);
-  }
+// Git Bash's own `tar` on PATH is MSYS2's GNU tar, which can't write ZIP
+// archives (--format=zip is rejected). Windows' built-in System32\tar.exe
+// is libarchive/bsdtar and handles ZIP fine, so call it by absolute path
+// rather than trust PATH resolution order. `zip` itself is not present on
+// windows-latest Git Bash (confirmed via CI diagnostic), so this branch is
+// the only option there. NOTE: as of this comment, CI still hits an
+// intermittent Windows-only EBUSY on the final unlink/rename a few files
+// into this path (see PR history) with no confirmed root cause yet — the
+// step is gated off on Windows in the workflow until that's resolved.
+function windowsTar() {
+  return path.join(process.env.SystemRoot || "C:\\Windows", "System32", "tar.exe");
 }
 
 function zipDir(archivePath, sourceDir, workDir) {
@@ -72,7 +71,7 @@ function normalizeFile(file) {
   const staged = path.join(workRoot, "staged.docx");
   try {
     fs.mkdirSync(extractRoot);
-    unzipFile(file, extractRoot, workRoot);
+    unzipFile(file, extractRoot);
     const wordRoot = path.join(extractRoot, "word");
     for (const name of fs.readdirSync(wordRoot).filter((entry) => entry.endsWith(".xml"))) {
       const xmlFile = path.join(wordRoot, name);
