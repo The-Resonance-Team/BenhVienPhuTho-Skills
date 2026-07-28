@@ -25,15 +25,22 @@ function isWin32() {
 
 function unzipFile(source, dest) {
   if (isWin32()) {
-    run("tar", ["-xf", source, "-C", dest]);
+    // Windows' bsdtar reads an absolute "D:\..." archive path as ssh-style
+    // host:path remote syntax because of the drive-letter colon. Running
+    // from the file's own directory and passing a relative name sidesteps it.
+    run("tar", ["-xf", path.basename(source), "-C", dest], { cwd: path.dirname(source) });
   } else {
     run("unzip", ["-q", source, "-d", dest]);
   }
 }
 
-function zipDir(source, dest, cwd) {
+function zipDir(dest, cwd) {
   if (isWin32()) {
-    run("tar", ["-cf", dest, "--format=zip", "-C", cwd, "."]);
+    // Archiving "." makes bsdtar prefix every entry with "./", which breaks
+    // OOXML part resolution ([Content_Types].xml is no longer an exact
+    // match). Archiving the top-level entries by name avoids the prefix.
+    const entries = fs.readdirSync(cwd);
+    run("tar", ["-cf", path.basename(dest), "--format=zip", "-C", cwd, ...entries], { cwd: path.dirname(dest) });
   } else {
     run("zip", ["-q", "-0", "-X", "-r", dest, "."], { cwd });
   }
@@ -58,7 +65,7 @@ function normalizeFile(file) {
     }
     // Store entries without recompressing large Office packages. This avoids
     // platform-specific ZIP corruption while preserving the normalized XML.
-    zipDir(staged, staged, tempRoot);
+    zipDir(staged, tempRoot);
     safeRmSync(file);
     fs.renameSync(staged, file);
   } finally {
