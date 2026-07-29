@@ -29,15 +29,17 @@ Domain skills (phong-ktda, phong-vattu, phong-hcqt, etc.) call this orchestrator
 
 ## How domain skills call this
 
-The domain skill writes two files to a temp directory, then invokes the orchestrator:
+The domain skill writes two files to a workspace-relative directory, then invokes the orchestrator:
 
-```bash
-# Domain skill creates these files:
-# 1. /tmp/skill-run/<skill-name>/<package>/fields.json
-# 2. /tmp/skill-run/<skill-name>/<package>/manifest.json
+```
+# Domain skill creates these files (paths are workspace-relative):
+# 1. ./orchestrator-work/<skill-name>/<package>/fields.json
+# 2. ./orchestrator-work/<skill-name>/<package>/manifest.json
 
 # Then calls orchestrator via task tool (see "Spawning workers" below)
 ```
+
+The `orchestrator-work/` directory is created automatically and should be in `.gitignore`.
 
 ### manifest.json format
 
@@ -130,7 +132,7 @@ task(
 
     Given:
     - Template: skills/<skill-name>/assets/<slug>.docx
-    - Fields: /tmp/skill-run/<skill-name>/<package>/fields.json
+    - Fields: ./orchestrator-work/<skill-name>/<package>/fields.json
     - Output: <outputDir>/<output-filename>
 
     Steps:
@@ -187,8 +189,8 @@ Skill: phong-ktda
 Template: hop-dong-kinh-te.docx
 Step failed: validate
 Error: {{SO_HOP_DONG}} placeholder remaining — field not in fields.json
-Manifest: /tmp/skill-run/phong-ktda/chi-dinh-thau-dich-vu/manifest.json
-Fields: /tmp/skill-run/phong-ktda/chi-dinh-thau-dich-vu/fields.json
+Manifest: ./orchestrator-work/phong-ktda/chi-dinh-thau-dich-vu/manifest.json
+Fields: ./orchestrator-work/phong-ktda/chi-dinh-thau-dich-vu/fields.json
 Timestamp: 2026-07-29T10:30:00Z
 --- END REPORT ---
 ```
@@ -198,9 +200,10 @@ Timestamp: 2026-07-29T10:30:00Z
 After presenting results, auto-open the output directory:
 
 ```bash
-open <outputDir>  # macOS
-# or
-xdg-open <outputDir>  # Linux
+# Cross-platform auto-open
+open <outputDir>          # macOS
+xdg-open <outputDir>      # Linux
+start <outputDir>         # Windows
 ```
 
 ## Concurrency control

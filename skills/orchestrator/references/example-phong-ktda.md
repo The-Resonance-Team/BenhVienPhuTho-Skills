@@ -5,7 +5,7 @@ This shows how a domain skill would set up the orchestrator for a "chỉ định
 ## Directory structure
 
 ```
-/tmp/skill-run/phong-ktda/chi-dinh-thau-dich-vu/
+./orchestrator-work/phong-ktda/chi-dinh-thau-dich-vu/
 ├── fields.json          # All extracted/confirmed data
 ├── manifest.json        # Orchestrator config
 └── output/              # Generated files land here (copied to workspace)
@@ -171,8 +171,8 @@ Skill: phong-ktda
 Template: bien-ban-hoan-thien-hop-dong.docx
 Step failed: validate
 Error: missing field TEN_NHA_THAU_DIA_CHI — not in fields.json
-Manifest: /tmp/skill-run/phong-ktda/chi-dinh-thau-dich-vu/manifest.json
-Fields: /tmp/skill-run/phong-ktda/chi-dinh-thau-dich-vu/fields.json
+Manifest: ./orchestrator-work/phong-ktda/chi-dinh-thau-dich-vu/manifest.json
+Fields: ./orchestrator-work/phong-ktda/chi-dinh-thau-dich-vu/fields.json
 Timestamp: 2026-07-29T10:30:00Z
 --- END REPORT ---
 ```
