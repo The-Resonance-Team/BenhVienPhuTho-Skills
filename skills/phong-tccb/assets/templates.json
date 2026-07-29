@@ -1,0 +1,41 @@
+{
+  "skill": "phong-tccb",
+  "description": "Chế độ nghỉ hưu, xác nhận công tác, thay đổi nhân lực",
+  "templates": [
+    {
+      "slug": "qd-nghi-huu",
+      "output": "01-qd-nghi-huu.docx",
+      "depends": []
+    },
+    {
+      "slug": "tb-nghi-huu",
+      "output": "02-tb-nghi-huu.docx",
+      "depends": ["01-qd-nghi-huu.docx"]
+    },
+    {
+      "slug": "cv-de-nghi-bhxh-giai-quyet-huu-tri",
+      "output": "03-cv-de-nghi-bhxh-giai-quyet-huu-tri.docx",
+      "depends": ["02-tb-nghi-huu.docx"]
+    },
+    {
+      "slug": "cv-bao-cao-soyte-nghi-huu-lanh-dao",
+      "output": "04-cv-bao-cao-soyte-nghi-huu-lanh-dao.docx",
+      "depends": ["03-cv-de-nghi-bhxh-giai-quyet-huu-tri.docx"]
+    },
+    {
+      "slug": "van-ban-de-nghi-che-do-bhxh",
+      "output": "05-van-ban-de-nghi-che-do-bhxh.docx",
+      "depends": ["03-cv-de-nghi-bhxh-giai-quyet-huu-tri.docx"]
+    },
+    {
+      "slug": "giay-xac-nhan-thoi-gian-cong-tac",
+      "output": "06-giay-xac-nhan-thoi-gian-cong-tac.docx",
+      "depends": []
+    },
+    {
+      "slug": "cv-thongbao-bhxh-thay-doi-nhan-luc",
+      "output": "07-cv-thongbao-bhxh-thay-doi-nhan-luc.docx",
+      "depends": []
+    }
+  ]
+}

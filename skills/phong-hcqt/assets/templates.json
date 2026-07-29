@@ -1,0 +1,121 @@
+{
+  "skill": "phong-hcqt",
+  "description": "Chỉ định thầu 50–dưới 500 triệu + Quản trị văn phòng & điều xe",
+  "templates": [
+    {
+      "slug": "don-de-xuat",
+      "output": "01-don-de-xuat.docx",
+      "depends": []
+    },
+    {
+      "slug": "yeu-cau-bao-gia",
+      "output": "02-yeu-cau-bao-gia.docx",
+      "depends": []
+    },
+    {
+      "slug": "du-toan",
+      "output": "03-du-toan.docx",
+      "depends": []
+    },
+    {
+      "slug": "to-trinh-du-toan-khlcnt",
+      "output": "04-to-trinh-du-toan-khlcnt.docx",
+      "depends": []
+    },
+    {
+      "slug": "qd-phe-duyet-du-toan-khlcnt",
+      "output": "05-qd-phe-duyet-du-toan-khlcnt.docx",
+      "depends": ["04-to-trinh-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "thu-moi-ky-hop-dong",
+      "output": "06-thu-moi-ky-hop-dong.docx",
+      "depends": ["05-qd-phe-duyet-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "thu-moi-hoan-thien-hop-dong",
+      "output": "07-thu-moi-hoan-thien-hop-dong.docx",
+      "depends": ["05-qd-phe-duyet-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "du-thao-hop-dong",
+      "output": "08-du-thao-hop-dong.docx",
+      "depends": ["05-qd-phe-duyet-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "bien-ban-hoan-thien-hop-dong",
+      "output": "09-bien-ban-hoan-thien-hop-dong.docx",
+      "depends": ["08-du-thao-hop-dong.docx"]
+    },
+    {
+      "slug": "to-trinh-kqlcnt",
+      "output": "10-to-trinh-kqlcnt.docx",
+      "depends": ["09-bien-ban-hoan-thien-hop-dong.docx"]
+    },
+    {
+      "slug": "qd-phe-duyet-kqlcnt",
+      "output": "11-qd-phe-duyet-kqlcnt.docx",
+      "depends": ["10-to-trinh-kqlcnt.docx"]
+    },
+    {
+      "slug": "hop-dong",
+      "output": "12-hop-dong.docx",
+      "depends": ["11-qd-phe-duyet-kqlcnt.docx"]
+    },
+    {
+      "slug": "bbnt-khoi-luong-hoan-thanh",
+      "output": "13-bbnt-khoi-luong-hoan-thanh.docx",
+      "depends": ["12-hop-dong.docx"]
+    },
+    {
+      "slug": "bien-ban-thanh-ly-hop-dong",
+      "output": "14-bien-ban-thanh-ly-hop-dong.docx",
+      "depends": ["13-bbnt-khoi-luong-hoan-thanh.docx"]
+    },
+    {
+      "slug": "giay-de-nghi-thanh-toan",
+      "output": "15-giay-de-nghi-thanh-toan.docx",
+      "depends": ["14-bien-ban-thanh-ly-hop-dong.docx"]
+    },
+    {
+      "slug": "qtvh-01-bm01-du-tru-vat-tu",
+      "output": "16-qtvh-01-bm01-du-tru-vat-tu.docx",
+      "depends": []
+    },
+    {
+      "slug": "qtvh-01-bm02-danh-sach-ncc",
+      "output": "17-qtvh-01-bm02-danh-sach-ncc.docx",
+      "depends": []
+    },
+    {
+      "slug": "qtvh-01-bm03-danh-gia-ncc-moi",
+      "output": "18-qtvh-01-bm03-danh-gia-ncc-moi.docx",
+      "depends": []
+    },
+    {
+      "slug": "qtvh-01-bm04-danh-gia-ncc-cu",
+      "output": "19-qtvh-01-bm04-danh-gia-ncc-cu.docx",
+      "depends": []
+    },
+    {
+      "slug": "qtvh-04-bm01-dieu-dong-xe",
+      "output": "20-qtvh-04-bm01-dieu-dong-xe.docx",
+      "depends": []
+    },
+    {
+      "slug": "qtvh-04-bm02-dieu-dong-xe",
+      "output": "21-qtvh-04-bm02-dieu-dong-xe.docx",
+      "depends": []
+    },
+    {
+      "slug": "qtvh-05-bm01-van-phong-pham",
+      "output": "22-qtvh-05-bm01-van-phong-pham.docx",
+      "depends": []
+    },
+    {
+      "slug": "qtvh-05-bm02-van-phong-pham",
+      "output": "23-qtvh-05-bm02-van-phong-pham.docx",
+      "depends": []
+    }
+  ]
+}

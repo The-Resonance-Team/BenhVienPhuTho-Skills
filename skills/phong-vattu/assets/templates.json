@@ -1,0 +1,61 @@
+{
+  "skill": "phong-vattu",
+  "description": "Mua sắm hàng hoá/vật tư y tế trên ngưỡng qua mạng đấu thầu quốc gia",
+  "templates": [
+    {
+      "slug": "qd-phe-duyet-chu-truong-vattu",
+      "output": "01-qd-phe-duyet-chu-truong-vattu.docx",
+      "depends": []
+    },
+    {
+      "slug": "bb-hop-hdkh-danh-muc-tckt",
+      "output": "02-bb-hop-hdkh-danh-muc-tckt.docx",
+      "depends": ["01-qd-phe-duyet-chu-truong-vattu.docx"]
+    },
+    {
+      "slug": "qd-phe-duyet-danh-muc-tckt",
+      "output": "03-qd-phe-duyet-danh-muc-tckt.docx",
+      "depends": ["02-bb-hop-hdkh-danh-muc-tckt.docx"]
+    },
+    {
+      "slug": "bb-hop-tcg-du-toan-khlcnt",
+      "output": "04-bb-hop-tcg-du-toan-khlcnt.docx",
+      "depends": ["03-qd-phe-duyet-danh-muc-tckt.docx"]
+    },
+    {
+      "slug": "qd-phe-duyet-nhiem-vu-du-toan",
+      "output": "05-qd-phe-duyet-nhiem-vu-du-toan.docx",
+      "depends": ["04-bb-hop-tcg-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "to-trinh-khlcnt-vattu",
+      "output": "06-to-trinh-khlcnt-vattu.docx",
+      "depends": ["05-qd-phe-duyet-nhiem-vu-du-toan.docx"]
+    },
+    {
+      "slug": "qd-phe-duyet-khlcnt-vattu",
+      "output": "07-qd-phe-duyet-khlcnt-vattu.docx",
+      "depends": ["06-to-trinh-khlcnt-vattu.docx"]
+    },
+    {
+      "slug": "bb-hop-tcg-xay-hscg",
+      "output": "08-bb-hop-tcg-xay-hscg.docx",
+      "depends": ["07-qd-phe-duyet-khlcnt-vattu.docx"]
+    },
+    {
+      "slug": "to-trinh-kqlcnt-vattu",
+      "output": "09-to-trinh-kqlcnt-vattu.docx",
+      "depends": ["08-bb-hop-tcg-xay-hscg.docx"]
+    },
+    {
+      "slug": "qd-phe-duyet-kqlcnt-vattu",
+      "output": "10-qd-phe-duyet-kqlcnt-vattu.docx",
+      "depends": ["09-to-trinh-kqlcnt-vattu.docx"]
+    },
+    {
+      "slug": "hop-dong-vattu",
+      "output": "11-hop-dong-vattu.docx",
+      "depends": ["10-qd-phe-duyet-kqlcnt-vattu.docx"]
+    }
+  ]
+}
