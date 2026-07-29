@@ -1,0 +1,81 @@
+{
+  "skill": "phong-ktda",
+  "description": "Chỉ định thầu DỊCH VỤ 50–dưới 500 triệu",
+  "templates": [
+    {
+      "slug": "don-de-xuat-ktda",
+      "output": "01-don-de-xuat-ktda.docx",
+      "depends": []
+    },
+    {
+      "slug": "thu-moi-bao-gia-dich-vu",
+      "output": "02-thu-moi-bao-gia-dich-vu.docx",
+      "depends": []
+    },
+    {
+      "slug": "du-toan-ktda",
+      "output": "03-du-toan-ktda.docx",
+      "depends": []
+    },
+    {
+      "slug": "to-trinh-du-toan-khlcnt",
+      "output": "04-to-trinh-du-toan-khlcnt.docx",
+      "depends": []
+    },
+    {
+      "slug": "qd-phe-duyet-du-toan-khlcnt",
+      "output": "05-qd-phe-duyet-du-toan-khlcnt.docx",
+      "depends": ["04-to-trinh-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "thu-moi-hoan-thien-hop-dong",
+      "output": "06-thu-moi-hoan-thien-hop-dong.docx",
+      "depends": ["05-qd-phe-duyet-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "du-thao-hop-dong",
+      "output": "07-du-thao-hop-dong.docx",
+      "depends": ["05-qd-phe-duyet-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "bien-ban-hoan-thien-hop-dong",
+      "output": "08-bien-ban-hoan-thien-hop-dong.docx",
+      "depends": ["07-du-thao-hop-dong.docx"]
+    },
+    {
+      "slug": "to-trinh-kqlcnt",
+      "output": "09-to-trinh-kqlcnt.docx",
+      "depends": ["08-bien-ban-hoan-thien-hop-dong.docx"]
+    },
+    {
+      "slug": "qd-phe-duyet-kqlcnt",
+      "output": "10-qd-phe-duyet-kqlcnt.docx",
+      "depends": ["09-to-trinh-kqlcnt.docx"]
+    },
+    {
+      "slug": "hop-dong",
+      "output": "11-hop-dong.docx",
+      "depends": ["10-qd-phe-duyet-kqlcnt.docx"]
+    },
+    {
+      "slug": "bbnt-cong-viec",
+      "output": "12-bbnt-cong-viec.docx",
+      "depends": ["11-hop-dong.docx"]
+    },
+    {
+      "slug": "bbnt-khoi-luong-hoan-thanh",
+      "output": "13-bbnt-khoi-luong-hoan-thanh.docx",
+      "depends": ["12-bbnt-cong-viec.docx"]
+    },
+    {
+      "slug": "bien-ban-thanh-ly-hop-dong",
+      "output": "14-bien-ban-thanh-ly-hop-dong.docx",
+      "depends": ["13-bbnt-khoi-luong-hoan-thanh.docx"]
+    },
+    {
+      "slug": "giay-de-nghi-thanh-toan",
+      "output": "15-giay-de-nghi-thanh-toan.docx",
+      "depends": ["14-bien-ban-thanh-ly-hop-dong.docx"]
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "skill": "phong-cntt",
+  "description": "Mua sắm/LCNT thiết bị CNTT",
+  "templates": [
+    {
+      "slug": "don-de-xuat-cntt",
+      "output": "01-don-de-xuat-cntt.docx",
+      "depends": []
+    },
+    {
+      "slug": "yeu-cau-bao-gia-cntt",
+      "output": "02-yeu-cau-bao-gia-cntt.docx",
+      "depends": []
+    },
+    {
+      "slug": "to-trinh-du-toan-khlcnt",
+      "output": "03-to-trinh-du-toan-khlcnt.docx",
+      "depends": []
+    },
+    {
+      "slug": "qd-phe-duyet-du-toan-khlcnt",
+      "output": "04-qd-phe-duyet-du-toan-khlcnt.docx",
+      "depends": ["03-to-trinh-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "thu-moi-hoan-thien-hop-dong",
+      "output": "05-thu-moi-hoan-thien-hop-dong.docx",
+      "depends": ["04-qd-phe-duyet-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "du-thao-hop-dong",
+      "output": "06-du-thao-hop-dong.docx",
+      "depends": ["04-qd-phe-duyet-du-toan-khlcnt.docx"]
+    },
+    {
+      "slug": "bien-ban-hoan-thien-hop-dong",
+      "output": "07-bien-ban-hoan-thien-hop-dong.docx",
+      "depends": ["06-du-thao-hop-dong.docx"]
+    },
+    {
+      "slug": "to-trinh-kqlcnt",
+      "output": "08-to-trinh-kqlcnt.docx",
+      "depends": ["07-bien-ban-hoan-thien-hop-dong.docx"]
+    },
+    {
+      "slug": "qd-phe-duyet-kqlcnt",
+      "output": "09-qd-phe-duyet-kqlcnt.docx",
+      "depends": ["08-to-trinh-kqlcnt.docx"]
+    },
+    {
+      "slug": "hop-dong",
+      "output": "10-hop-dong.docx",
+      "depends": ["09-qd-phe-duyet-kqlcnt.docx"]
+    },
+    {
+      "slug": "bbnt-khoi-luong-hoan-thanh",
+      "output": "11-bbnt-khoi-luong-hoan-thanh.docx",
+      "depends": ["10-hop-dong.docx"]
+    },
+    {
+      "slug": "bien-ban-thanh-ly-hop-dong",
+      "output": "12-bien-ban-thanh-ly-hop-dong.docx",
+      "depends": ["11-bbnt-khoi-luong-hoan-thanh.docx"]
+    },
+    {
+      "slug": "bien-ban-giao-nhan-tscd-ccdc",
+      "output": "13-bien-ban-giao-nhan-tscd-ccdc.docx",
+      "depends": ["10-hop-dong.docx"]
+    },
+    {
+      "slug": "de-nghi-thanh-toan-tu-ncc",
+      "output": "14-de-nghi-thanh-toan-tu-ncc.docx",
+      "depends": ["12-bien-ban-thanh-ly-hop-dong.docx"]
+    }
+  ]
+}

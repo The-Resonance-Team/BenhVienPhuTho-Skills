@@ -1,0 +1,36 @@
+{
+  "skill": "phong-dao-tao",
+  "description": "Xác nhận thời gian thực hành, chuyển giao kỹ thuật, đào tạo",
+  "templates": [
+    {
+      "slug": "phieu-khao-sat-thuc-trang-tuyen-duoi",
+      "output": "01-phieu-khao-sat-thuc-trang-tuyen-duoi.docx",
+      "depends": []
+    },
+    {
+      "slug": "ban-cam-ket-thuc-tap-sinh-vien",
+      "output": "02-ban-cam-ket-thuc-tap-sinh-vien.docx",
+      "depends": ["06-qd-cu-can-bo-thuc-hanh-don-vi-doi-tac.docx"]
+    },
+    {
+      "slug": "giay-xac-nhan-thoi-gian-thuc-hanh",
+      "output": "03-giay-xac-nhan-thoi-gian-thuc-hanh.docx",
+      "depends": ["05-qd-phan-cong-nguoi-huong-dan-thuc-hanh.docx"]
+    },
+    {
+      "slug": "hop-dong-thuc-hanh-kbcb",
+      "output": "04-hop-dong-thuc-hanh-kbcb.docx",
+      "depends": ["05-qd-phan-cong-nguoi-huong-dan-thuc-hanh.docx"]
+    },
+    {
+      "slug": "qd-phan-cong-nguoi-huong-dan-thuc-hanh",
+      "output": "05-qd-phan-cong-nguoi-huong-dan-thuc-hanh.docx",
+      "depends": []
+    },
+    {
+      "slug": "qd-cu-can-bo-thuc-hanh-don-vi-doi-tac",
+      "output": "06-qd-cu-can-bo-thuc-hanh-don-vi-doi-tac.docx",
+      "depends": []
+    }
+  ]
+}
