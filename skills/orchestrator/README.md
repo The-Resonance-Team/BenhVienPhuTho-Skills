@@ -26,8 +26,9 @@ When a domain skill (phong-ktda, phong-vattu, phong-hcqt) needs to generate 3+ d
 ## Usage from domain skill
 
 ```bash
-# 1. Create temp directory
-mkdir -p ./orchestrator-work/<skill-name>/<package>
+# 1. Create temp directory (cross-platform)
+ORCH_DIR="${TMPDIR:-/tmp}/orchestrator-work/<skill-name>/<package>"
+mkdir -p "$ORCH_DIR"
 
 # 2. Write fields.json
 # 3. Write manifest.json
@@ -37,8 +38,8 @@ task(
   description: "Orchestrator: generate documents",
   prompt: """
     Load skill orchestrator.
-    Read ./orchestrator-work/<skill-name>/<package>/manifest.json
-    Read ./orchestrator-work/<skill-name>/<package>/fields.json
+    Read $ORCH_DIR/manifest.json
+    Read $ORCH_DIR/fields.json
     Execute orchestration flow as defined in SKILL.md.
   """
 )

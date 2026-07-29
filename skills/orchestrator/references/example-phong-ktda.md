@@ -5,7 +5,7 @@ This shows how a domain skill would set up the orchestrator for a "chỉ định
 ## Directory structure
 
 ```
-./orchestrator-work/phong-ktda/chi-dinh-thau-dich-vu/
+$ORCH_DIR = ${TMPDIR:-/tmp}/orchestrator-work/phong-ktda/chi-dinh-thau-dich-vu/
 ├── fields.json          # All extracted/confirmed data
 ├── manifest.json        # Orchestrator config
 └── output/              # Generated files land here (copied to workspace)

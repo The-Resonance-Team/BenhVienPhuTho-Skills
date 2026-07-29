@@ -29,17 +29,22 @@ Domain skills (phong-ktda, phong-vattu, phong-hcqt, etc.) call this orchestrator
 
 ## How domain skills call this
 
-The domain skill writes two files to a workspace-relative directory, then invokes the orchestrator:
+The domain skill writes two files to a temp directory, then invokes the orchestrator:
 
 ```
-# Domain skill creates these files (paths are workspace-relative):
-# 1. ./orchestrator-work/<skill-name>/<package>/fields.json
-# 2. ./orchestrator-work/<skill-name>/<package>/manifest.json
+# Working directory (cross-platform):
+# - Use $TMPDIR if set, else fall back to /tmp (Unix) or %TEMP% (Windows)
+# - In shell: ORCH_DIR="${TMPDIR:-/tmp}/orchestrator-work/<skill-name>/<package>"
+# - In Node.js: require('os').tmpdir() + '/orchestrator-work/<skill-name>/<package>'
+
+# Domain skill creates these files:
+# 1. $ORCH_DIR/fields.json
+# 2. $ORCH_DIR/manifest.json
 
 # Then calls orchestrator via task tool (see "Spawning workers" below)
 ```
 
-The `orchestrator-work/` directory is created automatically and should be in `.gitignore`.
+The `orchestrator-work/` directory under system temp is created automatically and cleaned up after session.
 
 ### manifest.json format
 
@@ -132,7 +137,7 @@ task(
 
     Given:
     - Template: skills/<skill-name>/assets/<slug>.docx
-    - Fields: ./orchestrator-work/<skill-name>/<package>/fields.json
+    - Fields: $ORCH_DIR/fields.json (use: echo $ORCH_DIR to resolve)
     - Output: <outputDir>/<output-filename>
 
     Steps:
@@ -189,8 +194,8 @@ Skill: phong-ktda
 Template: hop-dong-kinh-te.docx
 Step failed: validate
 Error: {{SO_HOP_DONG}} placeholder remaining — field not in fields.json
-Manifest: ./orchestrator-work/phong-ktda/chi-dinh-thau-dich-vu/manifest.json
-Fields: ./orchestrator-work/phong-ktda/chi-dinh-thau-dich-vu/fields.json
+Manifest: $ORCH_DIR/manifest.json (resolve with: echo $ORCH_DIR)
+Fields: $ORCH_DIR/fields.json (resolve with: echo $ORCH_DIR)
 Timestamp: 2026-07-29T10:30:00Z
 --- END REPORT ---
 ```
