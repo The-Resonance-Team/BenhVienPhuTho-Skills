@@ -47,7 +47,7 @@ function Test-CommandExists {
 }
 
 if ($SkillOnly) {
-    Write-Host "`n[*] SkillOnly mode -- skipping tooling installation (Node, Python, OfficeCLI, OpenCode, OpenWork)" -ForegroundColor Yellow
+    Write-Host "`n[*] SkillOnly mode -- skipping tooling installation (Node, Python, markitdown, pandoc, OfficeCLI, OpenCode, OpenWork)" -ForegroundColor Yellow
 } else {
 
 # --- Set Execution Policy for current user ---
@@ -156,6 +156,71 @@ if (-not $pythonOk) {
             Remove-Item $pyPath -ErrorAction SilentlyContinue
             Write-Host "  [OK] Python 3.12 installed" -ForegroundColor Green
         }
+    }
+}
+
+# ==========================================
+# [3b/8] Python packages for reading Office files (markitdown, pdfplumber, pytesseract, pdf2image)
+# ==========================================
+Write-Host "`n[3b/8] Checking Python packages for Office file reading..." -ForegroundColor Cyan
+$pythonPackages = @("markitdown", "pdfplumber", "pytesseract", "pdf2image")
+$missingPackages = @()
+
+foreach ($pkg in $pythonPackages) {
+    if (pip show $pkg 2>&1 | Select-String "Name: $pkg") {
+        Write-Host "  [SKIP] $pkg already installed" -ForegroundColor DarkGray
+    } else {
+        $missingPackages += $pkg
+    }
+}
+
+if ($missingPackages.Count -gt 0) {
+    if (Test-CommandExists "pip") {
+        Write-Host "  [*] Installing: $($missingPackages -join ', ')..." -ForegroundColor Yellow
+        foreach ($pkg in $missingPackages) {
+            pip install $pkg 2>&1 | Out-Null
+        }
+        Write-Host "  [OK] Python packages installed" -ForegroundColor Green
+    } else {
+        Write-Host "  [!] pip not found. Install manually: pip install $($missingPackages -join ' ')" -ForegroundColor Red
+    }
+}
+
+# ==========================================
+# [3c/8] pandoc (for reading .docx files)
+# ==========================================
+Write-Host "`n[3c/8] Checking pandoc..." -ForegroundColor Cyan
+if (Test-CommandExists "pandoc") {
+    Write-Host "  [SKIP] pandoc already installed" -ForegroundColor DarkGray
+} else {
+    $installed = (Install-Winget -Id "JohnMacFarlane.Pandoc" -Name "pandoc")
+    if (-not $installed) { $installed = (Install-Choco -Package "pandoc" -Name "pandoc") }
+    if (-not $installed) {
+        Write-Host "  [!] pandoc install failed. Install manually: winget install JohnMacFarlane.Pandoc" -ForegroundColor Red
+    }
+}
+
+# ==========================================
+# [3d/8] tesseract + poppler (for OCR on scanned PDFs)
+# ==========================================
+Write-Host "`n[3d/8] Checking tesseract (OCR for scanned PDFs)..." -ForegroundColor Cyan
+if (Test-CommandExists "tesseract") {
+    Write-Host "  [SKIP] tesseract already installed" -ForegroundColor DarkGray
+} else {
+    $installed = (Install-Winget -Id "UB-Mannheim.TesseractOCR" -Name "tesseract")
+    if (-not $installed) { $installed = (Install-Choco -Package "tesseract" -Name "tesseract") }
+    if (-not $installed) {
+        Write-Host "  [!] tesseract install failed. Install manually: winget install UB-Mannheim.TesseractOCR" -ForegroundColor Red
+    }
+}
+
+Write-Host "`n[3d/8] Checking poppler (PDF to image conversion)..." -ForegroundColor Cyan
+if (Test-CommandExists "pdftoppm") {
+    Write-Host "  [SKIP] poppler already installed" -ForegroundColor DarkGray
+} else {
+    $installed = (Install-Choco -Package "poppler" -Name "poppler")
+    if (-not $installed) {
+        Write-Host "  [!] poppler install failed. Install manually: https://github.com/oschwartz10612/poppler-windows/releases" -ForegroundColor Red
     }
 }
 
@@ -311,7 +376,7 @@ if (-not $Department) {
     }
 }
 
-# Install/update the chosen department's skills (+ common officecli) via the skills CLI.
+# Install/update the chosen department's skills (+ common officecli/grilling/orchestrator/officefile-reader) via the skills CLI.
 # Pulls the latest from GitHub into OpenCode's global skills dir. Re-run any time to update.
 if (-not $Department) {
     Write-Host "  [SKIP] No department skills installed." -ForegroundColor DarkYellow
@@ -321,13 +386,17 @@ if (-not $Department) {
     $skillArgs = @(
         "-y", "skills@latest", "add", $SkillsRepo,
         "--agent", "opencode", "--global", "--copy", "--yes",
-        "--skill", "officecli", "--skill", $Department
+        "--skill", "officecli",
+        "--skill", "grilling",
+        "--skill", "orchestrator",
+        "--skill", "officefile-reader",
+        "--skill", $Department
     )
-    Write-Host "  [*] npx skills add $SkillsRepo --skill officecli --skill $Department" -ForegroundColor Yellow
+    Write-Host "  [*] npx skills add $SkillsRepo --skill officecli --skill grilling --skill orchestrator --skill officefile-reader --skill $Department" -ForegroundColor Yellow
     & npx @skillArgs
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "  [OK] Installed: officecli + $Department ($($Departments[$Department]))" -ForegroundColor Green
-        Write-Host "  [i] This machine has ONLY this department + officecli." -ForegroundColor Cyan
+        Write-Host "  [OK] Installed: officecli + grilling + orchestrator + officefile-reader + $Department ($($Departments[$Department]))" -ForegroundColor Green
+        Write-Host "  [i] This machine has ONLY this department + common skills (officecli/grilling/orchestrator/officefile-reader)." -ForegroundColor Cyan
         Write-Host "  [i] Update later:  npx -y skills@latest update --agent opencode --global" -ForegroundColor DarkGray
     } else {
         Write-Host "  [!] skills install failed (exit $LASTEXITCODE). Check network / repo access." -ForegroundColor Red
@@ -338,7 +407,7 @@ if (-not $Department) {
 # skills on this machine. When -CleanSkillsDir is given, remove the other phong-*
 # skills there, keeping only this machine's department. Opt-in and whitelisted:
 # only phong-* dirs that contain a SKILL.md, never the chosen department, never
-# common skills (officecli/setup/grilling). -DryRun previews without deleting.
+# common skills (officecli/setup/grilling/orchestrator/officefile-reader). -DryRun previews without deleting.
 if ($Department -and $CleanSkillsDir) {
     if (-not (Test-Path $CleanSkillsDir)) {
         Write-Host "  [!] -CleanSkillsDir not found: $CleanSkillsDir" -ForegroundColor Red
@@ -373,6 +442,8 @@ if (-not $SkillOnly) {
         @{ Name = "Node.js"; Cmd = "node"; Arg = "--version" },
         @{ Name = "npm"; Cmd = "npm"; Arg = "--version" },
         @{ Name = "Python"; Cmd = "python"; Arg = "--version" },
+        @{ Name = "markitdown"; Cmd = "markitdown"; Arg = "--version" },
+        @{ Name = "pandoc"; Cmd = "pandoc"; Arg = "--version" },
         @{ Name = "OfficeCLI"; Cmd = "officecli"; Arg = "--version" },
         @{ Name = "OpenCode"; Cmd = "opencode"; Arg = "--version" }
     )

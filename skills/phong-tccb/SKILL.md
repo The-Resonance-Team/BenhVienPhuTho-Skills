@@ -36,6 +36,27 @@ Danh mục field đầy đủ theo từng template: `references/tccb-truong-mau.
 - Kiểm tra `officecli --version` mỗi session trước khi dùng
 - **KHÔNG dùng** `textutil -convert docx` — tạo zip có `./` prefix + relationship rỗng, dùng `libreoffice --headless --convert-to docx` thay thế
 
+## Đọc file Office
+
+**ĐỌC nội dung file Office** (user cung cấp file để phân tích, xem nội dung) → dùng skill `officefile-reader`:
+
+```bash
+pandoc -t markdown file.docx  # .docx → pandoc
+markitdown file.xlsx
+markitdown file.pptx
+```
+
+- `.docx` → **pandoc** (nhanh hơn, thường có sẵn)
+- `.pdf` (text) → **pdfplumber** (tốt hơn markitdown)
+- `.pdf` (scanned) → **pytesseract** + **pdf2image** (OCR)
+- `.xlsx`/`.pptx` → **markitdown**
+
+**PPTX:** markitdown output có `<!-- Slide number: N -->` markers — dễ tìm slide cụ thể. Visual inspection: `officecli view deck.pptx html`.
+
+**TẠO/SỬA file Office** → dùng `officecli` (skill này).
+
+Cài đặt: qua skill `setup` hoặc `pip install markitdown pdfplumber pytesseract pdf2image` + `brew install pandoc tesseract poppler`. Không cài ngầm — hỏi user trước khi cài.
+
 ## Cổng bắt buộc (áp dụng mọi template — không oneshot)
 
 - **Không bịa dữ liệu cá nhân**: `{{HO_TEN}}`, CCCD, số sổ BHXH, số tài khoản, số điện thoại, ngày sinh, nơi sinh, nơi cư trú, địa chỉ liên hệ nếu người dùng chưa cung cấp. Đây là dữ liệu cá nhân theo Nghị định 13/2023/NĐ-CP — sai lệch có thể ảnh hưởng quyền lợi BHXH thật của viên chức.
