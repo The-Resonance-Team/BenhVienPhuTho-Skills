@@ -11,6 +11,27 @@ Skill theo phòng **NCKH&HTQT**, một trong hai phòng nghiệp vụ ngang cấ
 
 **Không có `assets/*.docx` runtime trong skill này** — toàn bộ nguồn khảo sát (~50 file) là hồ sơ đã ký hoàn tất hoặc văn bản pháp lý, không có mẫu trống nào để convert. Mọi nhánh dưới đây xuất bằng **Markdown đúng thể thức hành chính**, giống nhánh "chưa có mẫu" của `phong-tccb`/`phong-qlcl` nhưng áp dụng cho toàn bộ 6 mảng nghiệp vụ. Khi có mẫu trống thật hoặc hồ sơ được duyệt để sanitize, seed vào `assets/_seed/` và chạy `node scripts/build-runtime-assets.js --source-root <nguồn> --skills phong-nckh-htqt`; sau review mới bật nhánh xuất `.docx`.
 
+## Đọc file Office
+
+**ĐỌC nội dung file Office** (user cung cấp file để phân tích, xem nội dung) → dùng skill `officefile-reader`:
+
+```bash
+pandoc -t markdown file.docx  # .docx → pandoc
+markitdown file.xlsx
+markitdown file.pptx
+```
+
+- `.docx` → **pandoc** (nhanh hơn, thường có sẵn)
+- `.pdf` (text) → **pdfplumber** (tốt hơn markitdown)
+- `.pdf` (scanned) → **pytesseract** + **pdf2image** (OCR)
+- `.xlsx`/`.pptx` → **markitdown**
+
+**PPTX:** markitdown output có `<!-- Slide number: N -->` markers — dễ tìm slide cụ thể. Visual inspection: `officecli view deck.pptx html`.
+
+**TẠO/SỬA file Office** → dùng `officecli` (skill này).
+
+Cài đặt: qua skill `setup` hoặc `pip install markitdown pdfplumber pytesseract pdf2image` + `brew install pandoc tesseract poppler`. Không cài ngầm — hỏi user trước khi cài.
+
 ## Cổng bắt buộc (áp dụng mọi nhánh)
 
 - **Không bịa dữ liệu cá nhân**: họ tên, ngày sinh, ngạch/bậc/hệ số lương, số hộ chiếu, chức vụ của viên chức đi nước ngoài hoặc tham gia nghiên cứu/thử nghiệm lâm sàng nếu người dùng chưa cung cấp — mức độ nhạy cảm tương đương `phong-tccb`.

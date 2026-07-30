@@ -25,6 +25,27 @@ Chi tiết nguồn, quy trình dựng (`textutil -convert docx` cho 4 file `.doc
 - Kiểm tra `officecli --version` mỗi session trước khi dùng
 - **KHÔNG dùng** `textutil -convert docx` — tạo zip có `./` prefix + relationship rỗng, dùng `libreoffice --headless --convert-to docx` thay thế
 
+## Đọc file Office
+
+**ĐỌC nội dung file Office** (user cung cấp file để phân tích, xem nội dung) → dùng skill `officefile-reader`:
+
+```bash
+pandoc -t markdown file.docx  # .docx → pandoc
+markitdown file.xlsx
+markitdown file.pptx
+```
+
+- `.docx` → **pandoc** (nhanh hơn, thường có sẵn)
+- `.pdf` (text) → **pdfplumber** (tốt hơn markitdown)
+- `.pdf` (scanned) → **pytesseract** + **pdf2image** (OCR)
+- `.xlsx`/`.pptx` → **markitdown**
+
+**PPTX:** markitdown output có `<!-- Slide number: N -->` markers — dễ tìm slide cụ thể. Visual inspection: `officecli view deck.pptx html`.
+
+**TẠO/SỬA file Office** → dùng `officecli` (skill này).
+
+Cài đặt: qua skill `setup` hoặc `pip install markitdown pdfplumber pytesseract pdf2image` + `brew install pandoc tesseract poppler`. Không cài ngầm — hỏi user trước khi cài.
+
 ## Cổng bắt buộc (áp dụng mọi nhánh — cả template thật lẫn Markdown)
 
 Phòng Đào tạo là phòng **đầu tiên trong repo có cả 2 lớp dữ liệu nhạy cảm cùng lúc**: dữ liệu cá nhân người thực hành/học viên (như TCCB) VÀ dữ liệu hợp đồng/tài chính đối tác (như HCQT/KTDA) ở Nhóm 1 (Chuyển giao kỹ thuật) và Nhóm 4 (thực hành sinh viên).
