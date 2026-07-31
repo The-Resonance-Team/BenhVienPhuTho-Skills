@@ -1,20 +1,19 @@
 ---
 name: setup
-description: "Setup môi trường BV: kiểm tra skill grilling, officecli, Python packages (markitdown/pdfplumber/pytesseract/pdf2image), pandoc, tesseract, poppler, Node và npm. Dùng khi user nói setup, /setup, lần đầu, hoặc một skill báo thiếu tooling. Không tự cài đặt; nếu thiếu dependency thì xin user phê duyệt trước."
+description: "Setup môi trường BV: kiểm tra skill grilling, officecli, Python packages (markitdown/pdfplumber/pytesseract/PyMuPDF), pandoc, tesseract, Node và npm. Dùng khi user nói setup, /setup, lần đầu, hoặc một skill báo thiếu tooling. Không tự cài đặt; nếu thiếu dependency thì xin user phê duyệt trước."
 ---
 
 # Setup — tooling (officecli, Python packages, pandoc, tesseract)
 
 ## Tổng quan
 
-Sáu việc trong một skill:
+Năm việc trong một skill:
 
 1. **Grilling tooling** — đảm bảo skill `grilling` có sẵn (cài qua `npx skills add ... --skill grilling` nếu thiếu). Chỉ cần khi user muốn grilling thủ công.
 2. **officecli tooling** — kiểm tra binary `officecli` có sẵn trên PATH (chỉ cài sau khi user phê duyệt).
-3. **Python packages** — kiểm tra bộ packages đọc file Office: markitdown (.xlsx/.pptx), pdfplumber (.pdf), pytesseract (OCR), pdf2image (PDF → images). Chỉ cài sau khi user phê duyệt.
+3. **Python packages** — kiểm tra bộ packages đọc file Office: markitdown (.xlsx/.pptx), pdfplumber (.pdf), pytesseract (OCR Python API), PyMuPDF (PDF → ảnh), pillow (Image processing). Chỉ cài sau khi user phê duyệt.
 4. **pandoc tooling** — kiểm tra binary `pandoc` có sẵn (chỉ cài sau khi user phê duyệt). Dùng để đọc file .docx → markdown (nhanh hơn markitdown cho .docx).
-5. **tesseract** — binary cho OCR scanned PDFs (pytesseract Python package cần tesseract).
-6. **poppler** — bộ công cụ chuyển PDF → images (pdf2image cần poppler).
+5. **tesseract** — binary cho OCR scanned PDFs (pytesseract Python package cần tesseract, PyMuPDF render PDF → ảnh).
 
 Upstream: [`iOfficeAI/OfficeCLI`](https://github.com/iOfficeAI/OfficeCLI) — single-binary CLI, đọc/sửa/tạo `.docx`/`.xlsx`/`.pptx`. `phong-hcqt`/`phong-dieu-duong` dùng lệnh `officecli merge <template>.docx <output>.docx --data <fields>.json` để điền `{{KEY}}` trong template.
 
@@ -55,15 +54,15 @@ Không dùng `curl | bash`, `wget | sh`, `irm | iex`, hoặc lệnh tự tải s
 Bộ Python packages để đọc file Office. Cài khi thiếu, sau khi user phê duyệt:
 
 ```bash
-pip install markitdown pdfplumber pytesseract pdf2image
+pip install markitdown pdfplumber pytesseract PyMuPDF pillow
 ```
 
 - **markitdown**: .xlsx/.pptx → markdown
 - **pdfplumber**: .pdf → text/tables (tốt hơn markitdown cho PDF)
 - **pytesseract**: OCR cho scanned PDFs (cần tesseract binary)
-- **pdf2image**: chuyển PDF → images (cho OCR)
+- **PyMuPDF**: chuyển PDF → images (cho OCR, thay pdf2image)
 
-Verify: `pip list | grep -E "markitdown|pdfplumber|pytesseract|pdf2image"`.
+Verify: `pip list | grep -E "markitdown|pdfplumber|pytesseract|PyMuPDF|pillow"`.
 
 Cần Python 3 + pip trên máy (bước [3/8] trong `setup.ps1`).
 
@@ -88,30 +87,70 @@ winget install JohnMacFarlane.Pandoc
 
 **Lưu ý:** pandoc chỉ tốt cho .docx. Với .xlsx/.pptx/.pdf → dùng Python packages ở trên.
 
-## tesseract + poppler (OCR cho scanned PDFs)
+## tesseract + Vietnamese tessdata (OCR cho scanned PDFs)
 
-Cần cho OCR scanned PDFs (pytesseract Python package cần tesseract binary, pdf2image cần poppler).
+Cần cho OCR scanned PDFs (pytesseract Python package cần tesseract binary + gói ngôn ngữ, PyMuPDF dùng để render PDF → ảnh).
+
+### Kiểm tra tesseract
 
 ```
 tesseract --version    # đã cài → thoát code 0
-pdftoppm -v            # poppler đã cài → thoát code 0
 ```
 
-Cài khi thiếu, sau khi user phê duyệt:
+### Kiểm tra ngôn ngữ Vietnamese
+
+```bash
+# macOS / Linux
+tesseract --list-langs | grep vie
+
+# Windows
+tesseract --list-langs 2>&1 | findstr vie
+```
+
+Nếu **không có `vie`** → cần tải `vie.traineddata`:
+
+```bash
+# Tải từ GitHub tessdata (khoảng 3.3MB)
+curl -L -o vie.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/vie.traineddata
+
+# Di chuyển vào thư mục tessdata của tesseract
+# macOS
+cp vie.traineddata $(brew --prefix tesseract)/share/tessdata/
+
+# Linux
+sudo cp vie.traineddata /usr/share/tesseract-ocr/4.00/tessdata/
+
+# Windows — tìm thư mục tessdata
+# Thường ở: C:\Program Files\Tesseract-OCR\tessdata\
+copy vie.traineddata "C:\Program Files\Tesseract-OCR\tessdata\"
+```
+
+### Cài tesseract (khi thiếu)
+
+Cài sau khi user phê duyệt:
 
 ```bash
 # macOS
-brew install tesseract poppler
+brew install tesseract tesseract-lang
 
 # Linux (Debian/Ubuntu)
-sudo apt-get install tesseract-ocr poppler-utils
+sudo apt-get install tesseract-ocr tesseract-ocr-vie
 
 # Windows
 winget install UB-Mannheim.TesseractOCR
-# poppler: download from https://github.com/oschwartz10612/poppler-windows/releases
+# Sau đó tải vie.traineddata như trên
 ```
 
-**Lưu ý:** OCR chậm (1-2s/page), chỉ dùng khi pdfplumber trả về empty (PDF là ảnh scan).
+### Lưu ý
+
+- OCR chậm (1-2s/page), chỉ dùng khi pdfplumber trả về empty (PDF là ảnh scan).
+- Thiếu Vietnamese tessdata → OCR sẽ nhận diện sai ký tự tiếng Việt có dấu.
+- Tesseract path trên Windows: thường ở `C:\Program Files\Tesseract-OCR\tesseract.exe`.
+- Nếu `pytesseract` không tìm thấy tesseract → set path thủ công:
+  ```python
+  import pytesseract
+  pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+  ```
 
 ## Đường dẫn nhanh (bắt buộc — chống chậm mỗi session)
 
@@ -119,10 +158,10 @@ winget install UB-Mannheim.TesseractOCR
 
 1. Skill `grilling` có trong danh sách skill khả dụng? → **không** cài lại.
 2. `officecli --version` chạy được (exit 0)? → **không** cài lại.
-3. Python packages đã cài? → `pip list | grep -E "markitdown|pdfplumber|pytesseract|pdf2image"` → **không** cài lại nếu đủ.
+3. Python packages đã cài? → `pip list | grep -E "markitdown|pdfplumber|pytesseract|PyMuPDF|pillow"` → **không** cài lại nếu đủ.
 4. `pandoc --version` chạy được? → **không** cài lại.
-5. `tesseract --version` + `pdftoppm -v` chạy được? → **không** cài lại.
-6. Chỉ khi **thiếu** một trong sáu → mới làm bước tương ứng.
+5. `tesseract --version` chạy được? → **không** cài lại.
+6. Chỉ khi **thiếu** một trong năm → mới làm bước tương ứng.
 
 Kiểm tra = đọc danh sách skill / chạy `--version` (vài giây). **Cấm** mỗi session: cài lại nếu đã có.
 
@@ -130,13 +169,12 @@ Kiểm tra = đọc danh sách skill / chạy `--version` (vài giây). **Cấm*
 
 | Nhiệm vụ             | Cách thức                                                        |
 | -------------------- | ----------------------------------------------------------------- |
-| Lần đầu /setup       | grilling → officecli → Python packages → pandoc → tesseract+poppler |
+| Lần đầu /setup       | grilling → officecli → Python packages → pandoc → tesseract |
 | Session sau (đã sẵn) | Đường dẫn nhanh: kiểm tra 6 mục trên — bỏ qua cài lại           |
 | Thiếu skill grilling | `npx skills add https://github.com/mattpocock/skills --skill grilling` |
-| Thiếu Python packages | `pip install markitdown pdfplumber pytesseract pdf2image`        |
+| Thiếu Python packages | `pip install markitdown pdfplumber pytesseract PyMuPDF pillow`        |
 | Thiếu pandoc         | `brew install pandoc` (Mac) hoặc `winget install JohnMacFarlane.Pandoc` (Windows) |
-| Thiếu tesseract      | `brew install tesseract` (Mac) hoặc `winget install UB-Mannheim.TesseractOCR` (Windows) |
-| Thiếu poppler        | `brew install poppler` (Mac) hoặc download từ GitHub releases (Windows) |
+| Thiếu tesseract      | `brew install tesseract tesseract-lang` (Mac) hoặc `winget install UB-Mannheim.TesseractOCR` (Windows) |
 
 ## Các bước (thứ tự)
 
@@ -144,9 +182,9 @@ Kiểm tra = đọc danh sách skill / chạy `--version` (vài giây). **Cấm*
 2. Kiểm tra `node --version` và `npm --version` nếu có bước cài package.
 3. Thiếu skill `grilling` → xin phê duyệt rồi mới cài (`npx skills add https://github.com/mattpocock/skills --skill grilling`) → xác nhận gọi được.
 4. Thiếu officecli → xin phê duyệt rồi mới cài (mục trên) → xác nhận lại `officecli --version`.
-5. Thiếu Python packages → xin phê duyệt rồi mới cài (`pip install markitdown pdfplumber pytesseract pdf2image`) → xác nhận lại `pip list`.
+5. Thiếu Python packages → xin phê duyệt rồi mới cài (`pip install markitdown pdfplumber pytesseract PyMuPDF pillow`) → xác nhận lại `pip list`.
 6. Thiếu pandoc → xin phê duyệt rồi mới cài (`brew install pandoc` hoặc `winget install JohnMacFarlane.Pandoc`) → xác nhận lại `pandoc --version`.
-7. Thiếu tesseract/poppler → xin phê duyệt rồi mới cài (mục trên) → xác nhận lại `tesseract --version` và `pdftoppm -v`.
+7. Thiếu tesseract → xin phê duyệt rồi mới cài (mục trên) → xác nhận lại `tesseract --version`.
 8. Báo user kết quả ngắn.
 
 ## Quy tắc quan trọng
@@ -158,4 +196,4 @@ Kiểm tra = đọc danh sách skill / chạy `--version` (vài giây). **Cấm*
 
 ## Sau khi xong
 
-Tóm tắt cho user: (1) skill grilling OK hay vừa cài, (2) officecli OK hay thiếu gì, (3) Python packages OK hay thiếu gì, (4) pandoc OK hay thiếu gì, (5) tesseract+poppler OK hay thiếu gì, (6) bước tiếp theo.
+Tóm tắt cho user: (1) skill grilling OK hay vừa cài, (2) officecli OK hay thiếu gì, (3) Python packages OK hay thiếu gì, (4) pandoc OK hay thiếu gì, (5) tesseract OK hay thiếu gì, (6) bước tiếp theo.
