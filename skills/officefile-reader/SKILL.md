@@ -1,11 +1,62 @@
 ---
 name: officefile-reader
-description: Read Office files (.docx, .xlsx, .pptx, .pdf) and convert to markdown for inspection/analysis. Use when agent needs to READ the content of Office files — not create/edit (that's officecli). Triggers on "đọc file", "xem nội dung", "đọc docx/xlsx/pptx/pdf", "extract text from Office file", or when user provides an Office file for analysis.
+description: "Read Office files (.docx, .xlsx, .pptx, .pdf) into markdown. MANDATORY skill when user sends any Office/PDF file to read. Do NOT explain tools, do NOT ask user questions, do NOT say 'cannot read'. Scanned PDF -> run OCR immediately, install Tesseract if missing. Triggers: user sends file, 'read file', 'view content', 'read pdf', 'parse', 'extract text'."
 ---
 
 # officefile-reader
 
 Read Office files → markdown. Four tools: **pandoc** (.docx), **pdfplumber** (.pdf), **markitdown** (.xlsx/.pptx), **PyMuPDF + Tesseract** (scanned PDFs).
+
+## MANDATORY — guardrails
+
+**NEVER do the following:**
+- Say "cannot read" / "this is a scanned file" / "needs OCR" and ask the user
+- Ask "which method would you like me to use?"
+- Switch to Firecrawl, web search, browser, or any other tool
+- Explain technical details about tools (pdfplumber, tesseract, etc.) to the user
+- Present 2-3 options and ask the user to choose
+
+**MANDATORY flow — NO exceptions:**
+
+```
+User sends PDF → RUN IMMEDIATELY:
+  1. pdfplumber.extract_text()
+  2. If empty → OCR (two options, pick whichever works):
+     a) fitz.open() → page.get_pixmap(2x) → pytesseract.image_to_string(lang='vie+eng')
+     b) pdf2image.convert_from_path() → pytesseract.image_to_string(lang='vie+eng')
+  3. Windows: set pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+  4. Return text result to user
+```
+
+**Agent says exactly ONE sentence when done:** "Done. Content below." → then paste the text.
+
+No process explanation, no follow-up questions, no alternatives. This is a skill, not a suggestion.
+
+## MANDATORY — cleanup after use
+
+**After every file read operation, agent MUST clean up all temporary files it created:**
+
+- Delete any `.py` scripts written to temp directories (`/tmp/`, `$env:TEMP`, `C:\Users\*\AppData\Local\Temp\`)
+- Delete any intermediate output files (`.md`, `.txt`, `.png`, `.jpg` from OCR)
+- Delete any `pdf_pages_*.md` or `read_pdf*.md` output files in temp directories
+- Do NOT leave orphaned files on the user's machine
+
+**Cleanup command (run after output is delivered):**
+
+```powershell
+# Windows
+Remove-Item "$env:TEMP\read_pdf*.py" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:TEMP\pdf_pages_*.md" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:TEMP\*.png" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:TEMP\*.jpg" -Force -ErrorAction SilentlyContinue
+```
+
+```bash
+# macOS/Linux
+rm -f /tmp/read_pdf*.py /tmp/pdf_pages_*.md /tmp/*.png /tmp/*.jpg
+```
+
+**Rule: if you created it, you delete it. No exceptions.**
 
 ## When to use
 
@@ -13,10 +64,23 @@ Read Office files → markdown. Four tools: **pandoc** (.docx), **pdfplumber** (
 **CREATE/EDIT** Office files → use `officecli` skill instead.
 
 Common triggers:
-- User says "đọc file", "xem nội dung", "đọc docx/xlsx/pptx/pdf"
+- User says "read file", "view content", "read pdf", "parse"
 - User provides an Office file for analysis/inspection
 - Need to extract text/tables from Office files
 - User asks "what's in this file?"
+
+## How to talk to the user
+
+**DO NOT say:**
+- "I used pdfplumber/tesseract/fitz to read..."
+- "This is a scanned file, needs OCR..."
+- "Tesseract is not installed..."
+- "Which method would you like me to use?"
+- "There are 2-3 options: ..."
+
+**ONLY say:**
+- "Done. Content below:" → paste text
+- Or if truly unreadable (corrupt file): "This file could not be read. Please check the file."
 
 ## Tool selection
 
@@ -34,7 +98,7 @@ Common triggers:
 
 ### Install
 
-Cài qua skill `setup` hoặc `setup.ps1`. Không cài ngầm — hỏi user trước khi cài.
+Install via `setup` skill or `setup.ps1`. Do not install silently — ask user first.
 
 ```bash
 # macOS
@@ -120,25 +184,24 @@ with pdfplumber.open("document.pdf") as pdf:
 ### Pipeline
 
 ```
-PDF attach
-
-  │  pdfplumber → 0 chars ?
-  │  → có = scan ảnh
+PDF attached
+  │
+  │  pdfplumber → 0 chars?
+  │  → scanned image PDF
   │
   ▼
-
-  fitz.open(pdf)                              ← PyMuPDF mở PDF
+  fitz.open(pdf)                              ← PyMuPDF opens PDF
       │
-      ├─> page[i].get_pixmap(2x)             ← trang → ảnh zoom 2x
+      ├─> page[i].get_pixmap(2x)             ← page → image at 2x zoom
       │      │
       │      ▼
-      │  pytesseract(image, lang='vie+eng')  ← OCR ảnh → text
+      │  pytesseract(image, lang='vie+eng')  ← OCR image → text
       │      │
       │      ▼
-      │  Fix garbled text (tự đọc ngữ cảnh)  ← clean noise
+      │  Fix garbled text (auto context)      ← clean noise
       │      │
       ▼      ▼
-  Text tiếng Việt → trình bày
+  Vietnamese text → output
 ```
 
 ### Install
@@ -154,7 +217,7 @@ sudo apt-get install tesseract-ocr tesseract-ocr-vie
 
 # Windows
 # Download Tesseract: https://github.com/UB-Mannheim/tesseract/wiki
-# Sau đó tải Vietnamese tessdata:
+# Then download Vietnamese tessdata:
 curl -L -o vie.traineddata https://github.com/tesseract-ocr/tessdata/raw/main/vie.traineddata
 copy vie.traineddata "C:\Program Files\Tesseract-OCR\tessdata\"
 ```
@@ -163,7 +226,7 @@ Verify:
 ```bash
 python -c "import fitz; print(fitz.version)"
 python -c "import pytesseract; print(pytesseract.get_tesseract_version())"
-tesseract --list-langs  # Kiểm tra có 'vie' không
+tesseract --list-langs  # Check 'vie' is available
 ```
 
 ### Usage
@@ -185,17 +248,17 @@ def ocr_pdf(pdf_path: str, lang: str = "vie+eng") -> str:
     all_text = []
 
     for i, page in enumerate(doc):
-        # Render page → ảnh zoom 2x
+        # Render page → image at 2x zoom
         mat = fitz.Matrix(2, 2)  # 2x zoom = ~144 DPI
         pix = page.get_pixmap(matrix=mat)
 
         # Convert pixmap → PIL Image (in-memory, no temp file)
         img = Image.open(io.BytesIO(pix.tobytes("png")))
 
-        # OCR ảnh → text
+        # OCR image → text
         page_text = pytesseract.image_to_string(img, lang=lang)
 
-        # Fix garbled text (tự đọc ngữ cảnh)
+        # Fix garbled text
         page_text = fix_garbled(page_text)
 
         all_text.append(f"--- Page {i+1} ---\n{page_text}")
@@ -206,7 +269,6 @@ def ocr_pdf(pdf_path: str, lang: str = "vie+eng") -> str:
 
 def fix_garbled(text: str) -> str:
     """Fix common OCR garbled text for Vietnamese"""
-    # Common fixes
     replacements = {
         "đ)": "đ",
         "ă)": "ă",
@@ -238,8 +300,8 @@ print(text)
 - **Scanned PDFs** = images, not text → need OCR
 - `lang='vie+eng'` for Vietnamese + English text
 - Slow (1-2s per page) — use only when pdfplumber returns empty
-- Quality depends on scan resolution (2x zoom = ~144 DPI,足够 cho OCR)
-- pytesseract Python API — simpler than CLI subprocess, returns text trực tiếp
+- Quality depends on scan resolution (2x zoom = ~144 DPI, sufficient for OCR)
+- pytesseract Python API — simpler than CLI subprocess, returns text directly
 
 ---
 
@@ -247,13 +309,13 @@ print(text)
 
 ### Install
 
-Cài qua skill `setup` hoặc `setup.ps1`. Không cài ngầm — hỏi user trước khi cài.
+Install via `setup` skill or `setup.ps1`. Do not install silently — ask user first.
 
 ```bash
 pip install markitdown
 ```
 
-Verify: `markitdown --version`. Nếu không found sau khi cài, mở terminal mới.
+Verify: `markitdown --version`. If not found after install, open a new terminal.
 
 ### Usage
 
@@ -273,7 +335,7 @@ for f in *.pptx; do markitdown "$f" > "${f%.pptx}.md"; done
 
 ### PPTX notes
 
-markitdown output for .pptx có slide markers:
+markitdown output for .pptx has slide markers:
 
 ```markdown
 <!-- Slide number: 1 -->
@@ -287,9 +349,9 @@ Content here...
 More content...
 ```
 
-Mỗi slide bắt đầu bằng `<!-- Slide number: N -->` — dễ parse, tìm slide cụ thể.
+Each slide starts with `<!-- Slide number: N -->` — easy to parse, find specific slides.
 
-**Visual inspection**: dùng `officecli view deck.pptx html` để xem render, hoặc `officecli get deck.pptx '/slide[N]' --depth 2` để xem cấu trúc slide.
+**Visual inspection**: use `officecli view deck.pptx html` to see rendered output, or `officecli get deck.pptx '/slide[N]' --depth 2` to see slide structure.
 
 ---
 
@@ -337,7 +399,6 @@ officecli set report.docx '/body/p[3]' --prop text="Updated text"
 - **Accuracy**: Depends on scan quality, font, language
 - **Vietnamese**: Use `-l vie+eng` for best results
 - **Not built-in**: Requires tesseract installation
-- **Subprocess**: Uses CLI binary, not Python API
 
 ### markitdown (.xlsx/.pptx)
 - **Complex formatting**: Tables with merged cells, nested tables, or unusual layouts may not convert perfectly.
@@ -354,10 +415,10 @@ For pixel-perfect rendering or editing, use `officecli view` or `officecli get`.
 |---------|-----|
 | `pandoc: command not found` | Install: `brew install pandoc` (Mac) or `winget install JohnMacFarlane.Pandoc` (Windows) |
 | `ModuleNotFoundError: pdfplumber` | Install: `pip install pdfplumber` |
-| PDF returns empty text | PDF is scanned image → use PyMuPDF + Tesseract OCR |
-| Vietnamese OCR garbled | Install Vietnamese tessdata: download `vie.traineddata` from [GitHub](https://github.com/tesseract-ocr/tessdata/raw/main/vie.traineddata) → copy vào thư mục `tessdata/` của tesseract |
+| PDF returns empty text | **MANDATORY**: run PyMuPDF + Tesseract OCR — do NOT say "cannot read", do NOT use other tools |
+| Vietnamese OCR garbled | Install Vietnamese tessdata: download `vie.traineddata` from [GitHub](https://github.com/tesseract-ocr/tessdata/raw/main/vie.traineddata) → copy to tesseract `tessdata/` directory |
 | `pytesseract.TesseractNotFoundError` | Windows: set path `pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'` |
-| `tesseract` not in PATH | Windows: cài qua `winget install UB-Mannheim.TesseractOCR`, hoặc set path thủ công |
+| `tesseract` not in PATH | Windows: install via `winget install UB-Mannheim.TesseractOCR`, or set path manually |
 | `markitdown: command not found` | Install: `pip install markitdown` |
 | Table formatting broken | Complex tables (merged cells) → use `officecli view` instead |
 | Slow on large files | Split file or use `officecli get` for targeted extraction |
@@ -371,10 +432,12 @@ For pixel-perfect rendering or editing, use `officecli view` or `officecli get`.
 - Output is markdown — easy to parse, search, summarize
 - Works offline, no cloud/API calls
 - Safe: no code execution, no macros, no external dependencies
-- **PDF decision tree**:
+- **PDF decision tree** (MANDATORY):
   ```
   PDF?
-   ├─ text layer? ──> pdfplumber
-   ├─ scan ảnh?  ──> fitz + tesseract
-   └─ unsure?    ──> pdfplumber trước, empty → fitz + tesseract
+   ├─ pdfplumber.extract_text() returns text? → use it
+   └─ returns empty/None?
+        └─ MANDATORY: fitz + tesseract OCR
+             ├─ Tesseract not installed? → install it, then run OCR
+             └─ Already installed? → run OCR immediately, do NOT ask user
   ```

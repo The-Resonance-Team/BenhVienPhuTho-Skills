@@ -143,6 +143,22 @@ Sau khi đủ trường → tóm tắt toàn bộ giá trị (che bớt CCCD/s�
 
 ## Sinh file
 
+### MANDATORY — cleanup after delivery
+
+**After delivering .docx to user, agent MUST delete ALL temp files:**
+
+```powershell
+# Windows
+Remove-Item "$env:TEMP\fields.json" -Force -ErrorAction SilentlyContinue
+```
+
+```bash
+# macOS/Linux
+rm -f /tmp/fields.json
+```
+
+Also delete any intermediate `out.docx` copies in temp directories. **If you created it, you delete it.**
+
 ### Trường thân bài (an toàn cho `officecli merge`)
 
 ```bash

@@ -115,6 +115,22 @@ Sau khi đủ trường → tóm tắt toàn bộ giá trị (che bớt CCCD/s�
 
 ## Sinh file
 
+### MANDATORY — cleanup after delivery
+
+**After delivering .docx to user, agent MUST delete ALL temp files:**
+
+```powershell
+# Windows
+Remove-Item "$env:TEMP\fields.json" -Force -ErrorAction SilentlyContinue
+```
+
+```bash
+# macOS/Linux
+rm -f /tmp/fields.json
+```
+
+Also delete any intermediate `out.docx` copies in temp directories. **If you created it, you delete it.**
+
 ### Trường định danh/thân bài (an toàn cho `officecli merge`)
 
 Các token có tên ngữ nghĩa riêng (`HO_TEN`, `NOI_SINH`, `NOI_CU_TRU`, `DON_VI_CONG_TAC`, `CHUC_DANH_NGHE_NGHIEP`, `TRINH_DO_CHUYEN_MON`, `CHUC_VU`, `DIA_CHI`, `GIOI_TINH`, `NGAN_HANG_CHI_NHANH`, `SO_TAI_KHOAN`, `NOI_KCB_BAN_DAU`, `PHAM_VI_HANH_NGHE`, `TINH_TRANG_NHAN_SU`, `GIAM_DOC_KY`, `PHO_GIAM_DOC_KY`) xuất hiện với **một giá trị thật duy nhất lặp lại** trong cùng một file — an toàn để `merge`:

@@ -153,6 +153,22 @@ Sau khi đủ trường → tóm tắt toàn bộ giá trị → xin xác nhận
 
 ## Sinh file
 
+### MANDATORY — cleanup after delivery
+
+**After delivering .docx to user, agent MUST delete ALL temp files:**
+
+```powershell
+# Windows
+Remove-Item "$env:TEMP\fields.json" -Force -ErrorAction SilentlyContinue
+```
+
+```bash
+# macOS/Linux
+rm -f /tmp/fields.json
+```
+
+Also delete any intermediate `out.docx` copies in temp directories. **If you created it, you delete it.**
+
 Tạo `fields.json` bằng file tool an toàn trong thư mục tạm, quyền hạn chế; không in nội dung và xoá file sau khi kiểm tra. Chỉ merge một runtime template có thật trong `assets/`.
 
 ```bash

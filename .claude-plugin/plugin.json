@@ -13,6 +13,8 @@
     "phong-dao-tao",
     "phong-nckh-htqt",
     "officecli",
+    "officefile-reader",
+    "orchestrator",
     "setup",
     "grilling"
   ]

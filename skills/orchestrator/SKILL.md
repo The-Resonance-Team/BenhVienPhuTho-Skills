@@ -5,6 +5,29 @@ description: "Orchestrator for parallel document generation. Domain skills call 
 
 # Orchestrator — Parallel Document Generation
 
+## MANDATORY — cleanup after every session
+
+**After delivering output files to the user, agent MUST delete ALL temporary files:**
+
+1. Delete `orchestrator-work/` directory under system temp
+2. Delete any `fields.json`, `manifest.json` created during the session
+3. Delete any intermediate `.docx` files (failed merges, validation copies)
+4. Delete any Python/shell scripts created for batch processing
+
+```powershell
+# Windows — run after session completes
+Remove-Item "$env:TEMP\orchestrator-work" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:TEMP\fields.json" -Force -ErrorAction SilentlyContinue
+Remove-Item "$env:TEMP\manifest.json" -Force -ErrorAction SilentlyContinue
+```
+
+```bash
+# macOS/Linux — run after session completes
+rm -rf /tmp/orchestrator-work /tmp/fields.json /tmp/manifest.json
+```
+
+**Rule: if you created it, you delete it. No exceptions. Leaving temp files = broken skill.**
+
 ## What this does
 
 Domain skills (phong-ktda, phong-vattu, phong-hcqt, etc.) call this orchestrator when a task requires generating **3+ documents**. The orchestrator:
