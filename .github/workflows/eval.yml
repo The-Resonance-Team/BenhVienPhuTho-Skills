@@ -86,7 +86,7 @@ jobs:
           npx -y promptfoo@latest eval \
             -c evals/promptfooconfig.yaml \
             -o evals/results.json \
-            --max-concurrency 4 \
+            --max-concurrency 2 \
             --no-progress-bar \
             > evals/behavior-run-summary.txt 2>&1
           echo "promptfoo exit=$?"
