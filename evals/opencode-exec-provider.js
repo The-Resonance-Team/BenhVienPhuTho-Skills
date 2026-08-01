@@ -19,10 +19,7 @@
 const { execFileSync } = require("node:child_process");
 
 const MODEL = process.env.BVPT_OPENCODE_MODEL || "bvpt/Qwen3.6-35B-A3B-NVFP4";
-const TIMEOUT_MS = Number(process.env.BVPT_OPENCODE_TIMEOUT_MS || 180000);
-// If OPENCODE_ATTACH_URL is set (e.g. http://localhost:4096 from `opencode serve`),
-// reuse the long-lived server instead of paying a cold-start per invocation.
-const ATTACH_URL = process.env.OPENCODE_ATTACH_URL || "";
+const TIMEOUT_MS = Number(process.env.BVPT_OPENCODE_TIMEOUT_MS || 240000);
 
 function main() {
   const prompt = process.argv[2];
@@ -31,16 +28,20 @@ function main() {
     process.exit(1);
   }
 
-  const args = ["run", "--model", MODEL];
-  if (ATTACH_URL) args.push("--attach", ATTACH_URL);
-  args.push(prompt);
+  // Per-case progress line so CI logs show movement even when a single
+  // inference takes a while.
+  const startedAt = Date.now();
+  process.stderr.write(`[opencode-exec-provider] starting case (${prompt.length} chars)\n`);
 
-  const output = execFileSync("opencode", args, {
+  const output = execFileSync("opencode", ["run", "--model", MODEL, prompt], {
     encoding: "utf8",
     timeout: TIMEOUT_MS,
     maxBuffer: 16 * 1024 * 1024,
     stdio: ["ignore", "pipe", "pipe"],
   });
+
+  const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1);
+  process.stderr.write(`[opencode-exec-provider] done in ${elapsed}s, output ${output.length} chars\n`);
 
   process.stdout.write(output);
 }

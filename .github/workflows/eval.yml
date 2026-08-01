@@ -78,21 +78,6 @@ jobs:
       - name: Install skills from this checkout
         run: npx -y skills@latest add . --agent opencode --global --skill '*' --copy --yes
 
-      - name: Start OpenCode server
-        # Amortizes MCP server cold start across all 36 cases. Each
-        # `opencode run --attach` invocation talks to this server
-        # instead of booting a fresh one.
-        run: |
-          nohup opencode serve --port 4096 > /tmp/opencode-serve.log 2>&1 &
-          echo $! > /tmp/opencode-serve.pid
-          for i in $(seq 1 30); do
-            if curl -sf http://localhost:4096/ >/dev/null 2>&1; then
-              echo "opencode serve ready on port 4096 (attempt $i)"
-              break
-            fi
-            sleep 1
-          done
-
       - name: Run behavior run
         id: behavior_run
         continue-on-error: true # report-only — see docs/adr/0001-*
@@ -101,23 +86,15 @@ jobs:
           npx -y promptfoo@latest eval \
             -c evals/promptfooconfig.yaml \
             -o evals/results.json \
-            --max-concurrency 2 \
+            --max-concurrency 4 \
             --no-progress-bar \
             > evals/behavior-run-summary.txt 2>&1
           echo "promptfoo exit=$?"
           set -e
           # Always dump what we have, even if promptfoo was killed mid-run.
           cat evals/behavior-run-summary.txt || true
-
-      - name: Stop OpenCode server
-        if: always()
-        run: |
-          if [ -f /tmp/opencode-serve.pid ]; then
-            kill "$(cat /tmp/opencode-serve.pid)" 2>/dev/null || true
-          fi
         env:
           OPENCODE_CONFIG: ${{ github.workspace }}/evals/opencode.ci.jsonc
-          OPENCODE_ATTACH_URL: http://localhost:4096
           BVPT_VLLM_API_KEY: ${{ secrets.BVPT_VLLM_API_KEY }}
           # Promptfoo's openai grader auto-reads these env vars — keeps
           # promptfooconfig.yaml free of template placeholders that trip
