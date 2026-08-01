@@ -91,3 +91,17 @@ _Avoid_: macOS convert (dùng "textutil" để cảnh báo rõ)
 **LibreOffice headless**:
 Cách đúng để convert `.doc` → `.docx`: `libreoffice --headless --convert-to docx input.doc --outdir output/`
 _Avoid_: libreoffice (luôn ghi đầy đủ "LibreOffice headless" để phân biệt với GUI)
+
+## Ngôn ngữ chung — Eval CI
+
+**Eval case**:
+Một phần tử trong mảng `evals[]` của `evals/evals.json` — gồm `target_skill`, `should_trigger`, `prompt`, `expected_output`. Nguồn sự thật duy nhất; không tạo bản sao case ở nơi khác (kể cả trong config của công cụ chạy eval).
+_Avoid_: test case, eval (dùng trần không rõ nghĩa)
+
+**Structural check**:
+Job `validate-evals` — chạy `scripts/run-evals.js` không kèm cờ, không gọi model nào. Chỉ kiểm tra evals.json/skills/plugin.json khớp nhau.
+_Avoid_: eval suite, validation (dùng "structural check" để tách khỏi behavior run)
+
+**Behavior run**:
+Job chạy toàn bộ eval case qua OpenCode (đã cài skill của chính checkout đó) trỏ vào model tự host, rồi tự chấm bằng `llm-rubric` với chính model đó (self-judge). Report-only — không làm fail job.
+_Avoid_: "chạy eval qua OpenCode", "eval qua promptfoo" (dùng "behavior run" thống nhất dù công cụ nền là promptfoo)

@@ -1,0 +1,23 @@
+{
+  // CI-only OpenCode config for the behavior run (see docs/adr/0001-*).
+  // Loaded via OPENCODE_CONFIG, never merged into the root opencode.jsonc
+  // that real hospital staff installs use — this provider is invisible to
+  // them unless BVPT_VLLM_API_KEY happens to be set on their machine, and
+  // even then it's opt-in (not the default "model").
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "bvpt": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "BVPT self-hosted vLLM",
+      "options": {
+        "baseURL": "https://api-bvpt.resonance.io.vn/v1",
+        "apiKey": "{env:BVPT_VLLM_API_KEY}"
+      },
+      "models": {
+        "Qwen3.6-35B-A3B-NVFP4": {
+          "name": "Qwen3.6-35B-A3B-NVFP4 (self-hosted)"
+        }
+      }
+    }
+  }
+}
