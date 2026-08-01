@@ -20,6 +20,9 @@ const { execFileSync } = require("node:child_process");
 
 const MODEL = process.env.BVPT_OPENCODE_MODEL || "bvpt/Qwen3.6-35B-A3B-NVFP4";
 const TIMEOUT_MS = Number(process.env.BVPT_OPENCODE_TIMEOUT_MS || 180000);
+// If OPENCODE_ATTACH_URL is set (e.g. http://localhost:4096 from `opencode serve`),
+// reuse the long-lived server instead of paying a cold-start per invocation.
+const ATTACH_URL = process.env.OPENCODE_ATTACH_URL || "";
 
 function main() {
   const prompt = process.argv[2];
@@ -28,7 +31,11 @@ function main() {
     process.exit(1);
   }
 
-  const output = execFileSync("opencode", ["run", "--model", MODEL, prompt], {
+  const args = ["run", "--model", MODEL];
+  if (ATTACH_URL) args.push("--attach", ATTACH_URL);
+  args.push(prompt);
+
+  const output = execFileSync("opencode", args, {
     encoding: "utf8",
     timeout: TIMEOUT_MS,
     maxBuffer: 16 * 1024 * 1024,

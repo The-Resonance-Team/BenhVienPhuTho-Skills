@@ -35,7 +35,9 @@ jobs:
   behavior-run:
     name: Behavior run (promptfoo + OpenCode)
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # 36 cases × ~1 min × concurrency 2 + cold start. Headroom for slow
+    # vLLM responses from GitHub-hosted runners.
+    timeout-minutes: 90
     needs: validate-evals
     if: |
       github.event_name == 'pull_request' ||
@@ -76,18 +78,46 @@ jobs:
       - name: Install skills from this checkout
         run: npx -y skills@latest add . --agent opencode --global --skill '*' --copy --yes
 
+      - name: Start OpenCode server
+        # Amortizes MCP server cold start across all 36 cases. Each
+        # `opencode run --attach` invocation talks to this server
+        # instead of booting a fresh one.
+        run: |
+          nohup opencode serve --port 4096 > /tmp/opencode-serve.log 2>&1 &
+          echo $! > /tmp/opencode-serve.pid
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:4096/ >/dev/null 2>&1; then
+              echo "opencode serve ready on port 4096 (attempt $i)"
+              break
+            fi
+            sleep 1
+          done
+
       - name: Run behavior run
         id: behavior_run
         continue-on-error: true # report-only — see docs/adr/0001-*
         run: |
+          set +e
           npx -y promptfoo@latest eval \
             -c evals/promptfooconfig.yaml \
             -o evals/results.json \
             --max-concurrency 2 \
-            > evals/behavior-run-summary.txt 2>&1 || true
-          cat evals/behavior-run-summary.txt
+            --no-progress-bar \
+            > evals/behavior-run-summary.txt 2>&1
+          echo "promptfoo exit=$?"
+          set -e
+          # Always dump what we have, even if promptfoo was killed mid-run.
+          cat evals/behavior-run-summary.txt || true
+
+      - name: Stop OpenCode server
+        if: always()
+        run: |
+          if [ -f /tmp/opencode-serve.pid ]; then
+            kill "$(cat /tmp/opencode-serve.pid)" 2>/dev/null || true
+          fi
         env:
           OPENCODE_CONFIG: ${{ github.workspace }}/evals/opencode.ci.jsonc
+          OPENCODE_ATTACH_URL: http://localhost:4096
           BVPT_VLLM_API_KEY: ${{ secrets.BVPT_VLLM_API_KEY }}
           # Promptfoo's openai grader auto-reads these env vars — keeps
           # promptfooconfig.yaml free of template placeholders that trip
@@ -112,19 +142,31 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            let summary = 'Behavior run did not produce output — check the workflow logs and the behavior-run-results artifact.';
+            let summary = '';
+            let fileMissing = false;
             try {
               summary = fs.readFileSync('evals/behavior-run-summary.txt', 'utf8');
             } catch (e) {
-              // no-op — fall back to the placeholder message above
+              fileMissing = true;
             }
-            const maxLen = 60000;
+
+            let header;
+            if (fileMissing) {
+              header = 'Behavior run produced no output file — the job likely failed before promptfoo wrote anything. Check the workflow logs and the behavior-run-results artifact.';
+            } else if (summary.trim().length === 0) {
+              header = 'Behavior run output file is empty. Check the behavior-run-results artifact and workflow logs for what happened.';
+            } else if (summary.length > 60000) {
+              header = `Behavior run produced a long output (truncated to 60k chars below — full version in the behavior-run-results artifact).`;
+            } else {
+              header = `Behavior run completed (output length: ${summary.length} chars).`;
+            }
+
             const truncated =
-              summary.length > maxLen
-                ? summary.slice(0, maxLen) + '\n... (truncated — full output in the behavior-run-results artifact)'
+              summary.length > 60000
+                ? summary.slice(0, 60000) + '\n... (truncated — full output in the behavior-run-results artifact)'
                 : summary;
 
-            const body = `## Behavior run (report-only)\n\nSelf-judged via \`llm-rubric\` on the self-hosted model — see [ADR 0001](../blob/main/docs/adr/0001-promptfoo-behavior-run-self-hosted-model.md). A green run means "nothing obviously changed," not proof of correctness; this never blocks the PR.\n\n<details><summary>Output</summary>\n\n\`\`\`\n${truncated}\n\`\`\`\n\n</details>`;
+            const body = `## Behavior run (report-only)\n\n${header}\n\nSelf-judged via \`llm-rubric\` on the self-hosted model — see [ADR 0001](../blob/main/docs/adr/0001-promptfoo-behavior-run-self-hosted-model.md). A green run means "nothing obviously changed," not proof of correctness; this never blocks the PR.\n\n<details><summary>Output</summary>\n\n\`\`\`\n${truncated}\n\`\`\`\n\n</details>`;
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
