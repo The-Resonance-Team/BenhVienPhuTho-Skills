@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+#
+# Behavior run (see docs/adr/0001-promptfoo-behavior-run-self-hosted-model.md
+# and CONTEXT.md "Ngôn ngữ chung — Eval CI"). Drives OpenCode — with this
+# checkout's skills installed via `npx skills add .` — against the
+# self-hosted vLLM model for every case in evals.json, then self-judges
+# with the same model via llm-rubric. Report-only: CI never fails on this.
+description: BVPT skills behavior run
+
+prompts:
+  - '{{prompt}}'
+
+providers:
+  - id: 'exec: node opencode-exec-provider.js'
+    label: opencode-bvpt
+
+defaultTest:
+  options:
+    # API key + base URL come from OPENAI_API_KEY and OPENAI_BASE_URL
+    # env vars set in the workflow — keeps this config file free of any
+    # template placeholders that might trip credential-scanning hooks.
+    provider:
+      id: openai:chat:Qwen3.6-35B-A3B-NVFP4
+      config:
+        temperature: 0.1
+
+tests: file://generate-promptfoo-tests.js
