@@ -6,12 +6,14 @@
  * OPENCODE_CONFIG=evals/opencode.ci.jsonc), capture its final answer, and
  * hand that text back to promptfoo as this provider's output.
  *
- * Invoked by promptfoo as: node evals/opencode-exec-provider.js <prompt> <optionsJSON> <contextJSON>
- * (see providers: - 'exec: node evals/opencode-exec-provider.js' in promptfooconfig.yaml)
+ * Invoked by promptfoo as: node opencode-exec-provider.js <prompt> <optionsJSON> <contextJSON>
+ * (see providers: - 'exec: node opencode-exec-provider.js' in promptfooconfig.yaml)
  *
- * We don't pass optionsJSON/contextJSON through to opencode — `opencode run`
- * takes a single message argument, and forwarding those blobs as extra
- * positional args would get concatenated into the prompt itself.
+ * promptfoo sets basePath to the directory containing promptfooconfig.yaml,
+ * so the relative path above is correct from that working directory. The
+ * optionsJSON and contextJSON args are ignored — `opencode run` takes a
+ * single message argument, and forwarding those blobs as extra positional
+ * args would get concatenated into the prompt itself.
  */
 
 const { execFileSync } = require("node:child_process");
