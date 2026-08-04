@@ -160,10 +160,10 @@ if (-not $pythonOk) {
 }
 
 # ==========================================
-# [3b/8] Python packages for reading Office files (markitdown, pdfplumber, pytesseract, pdf2image)
+# [3b/8] Python packages for reading Office files (markitdown, pdfplumber, pytesseract, PyMuPDF, pillow)
 # ==========================================
 Write-Host "`n[3b/8] Checking Python packages for Office file reading..." -ForegroundColor Cyan
-$pythonPackages = @("markitdown", "pdfplumber", "pytesseract", "pdf2image")
+$pythonPackages = @("markitdown", "pdfplumber", "pytesseract", "PyMuPDF", "pillow")
 $missingPackages = @()
 
 foreach ($pkg in $pythonPackages) {
@@ -201,7 +201,7 @@ if (Test-CommandExists "pandoc") {
 }
 
 # ==========================================
-# [3d/8] tesseract + poppler (for OCR on scanned PDFs)
+# [3d/8] tesseract + Vietnamese tessdata (for OCR on scanned PDFs)
 # ==========================================
 Write-Host "`n[3d/8] Checking tesseract (OCR for scanned PDFs)..." -ForegroundColor Cyan
 if (Test-CommandExists "tesseract") {
@@ -214,13 +214,38 @@ if (Test-CommandExists "tesseract") {
     }
 }
 
-Write-Host "`n[3d/8] Checking poppler (PDF to image conversion)..." -ForegroundColor Cyan
-if (Test-CommandExists "pdftoppm") {
-    Write-Host "  [SKIP] poppler already installed" -ForegroundColor DarkGray
-} else {
-    $installed = (Install-Choco -Package "poppler" -Name "poppler")
-    if (-not $installed) {
-        Write-Host "  [!] poppler install failed. Install manually: https://github.com/oschwartz10612/poppler-windows/releases" -ForegroundColor Red
+# Check Vietnamese language pack
+if (Test-CommandExists "tesseract") {
+    Write-Host "`n  [3d/8] Checking Vietnamese tessdata..." -ForegroundColor Cyan
+    $tessDataDir = $null
+    $tesseractPath = (Get-Command tesseract -ErrorAction SilentlyContinue).Source
+    if ($tesseractPath) {
+        $tessDataDir = Join-Path (Split-Path $tesseractPath) "tessdata"
+    }
+    # Fallback: common install location
+    if (-not $tessDataDir -or -not (Test-Path $tessDataDir)) {
+        $tessDataDir = "C:\Program Files\Tesseract-OCR\tessdata"
+    }
+
+    $vieData = Join-Path $tessDataDir "vie.traineddata"
+    if (Test-Path $vieData) {
+        Write-Host "  [SKIP] Vietnamese tessdata already installed" -ForegroundColor DarkGray
+    } else {
+        Write-Host "  [*] Downloading Vietnamese tessdata (~3.3MB)..." -ForegroundColor Yellow
+        try {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $vieUrl = "https://github.com/tesseract-ocr/tessdata/raw/main/vie.traineddata"
+            (New-Object System.Net.WebClient).DownloadFile($vieUrl, $vieData)
+            if (Test-Path $vieData) {
+                Write-Host "  [OK] Vietnamese tessdata installed to $tessDataDir" -ForegroundColor Green
+            } else {
+                Write-Host "  [!] Download failed. Manually download: $vieUrl" -ForegroundColor Red
+            }
+        } catch {
+            Write-Host "  [!] Download failed: $_" -ForegroundColor Red
+            Write-Host "  [i] Manual download: https://github.com/tesseract-ocr/tessdata/raw/main/vie.traineddata" -ForegroundColor DarkYellow
+            Write-Host "  [i] Copy to: $tessDataDir" -ForegroundColor DarkYellow
+        }
     }
 }
 
@@ -376,27 +401,22 @@ if (-not $Department) {
     }
 }
 
-# Install/update the chosen department's skills (+ common officecli/grilling/orchestrator/officefile-reader) via the skills CLI.
+# Install/update the chosen department's skills (+ common officecli/grilling/orchestrator/office-*) via the skills CLI.
 # Pulls the latest from GitHub into OpenCode's global skills dir. Re-run any time to update.
 if (-not $Department) {
     Write-Host "  [SKIP] No department skills installed." -ForegroundColor DarkYellow
 } elseif (-not (Test-CommandExists "npx")) {
     Write-Host "  [!] npx not found (Node.js step failed?). Cannot install skills." -ForegroundColor Red
 } else {
-    $skillArgs = @(
-        "-y", "skills@latest", "add", $SkillsRepo,
-        "--agent", "opencode", "--global", "--copy", "--yes",
-        "--skill", "officecli",
-        "--skill", "grilling",
-        "--skill", "orchestrator",
-        "--skill", "officefile-reader",
-        "--skill", $Department
-    )
-    Write-Host "  [*] npx skills add $SkillsRepo --skill officecli --skill grilling --skill orchestrator --skill officefile-reader --skill $Department" -ForegroundColor Yellow
+    $CommonSkills = @("officecli", "grilling", "orchestrator", "office-docx", "office-pdf", "office-pptx", "office-xlsx")
+    $skillArgs = @("-y", "skills@latest", "add", $SkillsRepo, "--agent", "opencode", "--global", "--copy", "--yes")
+    foreach ($skillName in $CommonSkills) { $skillArgs += @("--skill", $skillName) }
+    $skillArgs += @("--skill", $Department)
+    Write-Host "  [*] npx skills add $SkillsRepo --skill $($CommonSkills -join ' --skill ') --skill $Department" -ForegroundColor Yellow
     & npx @skillArgs
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "  [OK] Installed: officecli + grilling + orchestrator + officefile-reader + $Department ($($Departments[$Department]))" -ForegroundColor Green
-        Write-Host "  [i] This machine has ONLY this department + common skills (officecli/grilling/orchestrator/officefile-reader)." -ForegroundColor Cyan
+        Write-Host "  [OK] Installed: $($CommonSkills -join ' + ') + $Department ($($Departments[$Department]))" -ForegroundColor Green
+        Write-Host "  [i] This machine has ONLY this department + common skills ($($CommonSkills -join '/'))." -ForegroundColor Cyan
         Write-Host "  [i] Update later:  npx -y skills@latest update --agent opencode --global" -ForegroundColor DarkGray
     } else {
         Write-Host "  [!] skills install failed (exit $LASTEXITCODE). Check network / repo access." -ForegroundColor Red
@@ -407,7 +427,7 @@ if (-not $Department) {
 # skills on this machine. When -CleanSkillsDir is given, remove the other phong-*
 # skills there, keeping only this machine's department. Opt-in and whitelisted:
 # only phong-* dirs that contain a SKILL.md, never the chosen department, never
-# common skills (officecli/setup/grilling/orchestrator/officefile-reader). -DryRun previews without deleting.
+# common skills (officecli/setup/grilling/orchestrator/office-*). -DryRun previews without deleting.
 if ($Department -and $CleanSkillsDir) {
     if (-not (Test-Path $CleanSkillsDir)) {
         Write-Host "  [!] -CleanSkillsDir not found: $CleanSkillsDir" -ForegroundColor Red
