@@ -27,7 +27,7 @@ Chi tiết nguồn, quy trình dựng (`textutil -convert docx` cho 4 file `.doc
 
 ## Đọc file Office
 
-**ĐỌC nội dung file Office** (user cung cấp file để phân tích, xem nội dung) → dùng skill `officefile-reader`:
+**ĐỌC nội dung file Office** (user cung cấp file để phân tích, xem nội dung) → dùng skill `office-docx`/`office-xlsx`/`office-pptx`/`office-pdf` theo loại file:
 
 ```bash
 pandoc -t markdown file.docx  # .docx → pandoc

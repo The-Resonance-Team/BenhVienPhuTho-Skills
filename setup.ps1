@@ -401,27 +401,22 @@ if (-not $Department) {
     }
 }
 
-# Install/update the chosen department's skills (+ common officecli/grilling/orchestrator/officefile-reader) via the skills CLI.
+# Install/update the chosen department's skills (+ common officecli/grilling/orchestrator/office-*) via the skills CLI.
 # Pulls the latest from GitHub into OpenCode's global skills dir. Re-run any time to update.
 if (-not $Department) {
     Write-Host "  [SKIP] No department skills installed." -ForegroundColor DarkYellow
 } elseif (-not (Test-CommandExists "npx")) {
     Write-Host "  [!] npx not found (Node.js step failed?). Cannot install skills." -ForegroundColor Red
 } else {
-    $skillArgs = @(
-        "-y", "skills@latest", "add", $SkillsRepo,
-        "--agent", "opencode", "--global", "--copy", "--yes",
-        "--skill", "officecli",
-        "--skill", "grilling",
-        "--skill", "orchestrator",
-        "--skill", "officefile-reader",
-        "--skill", $Department
-    )
-    Write-Host "  [*] npx skills add $SkillsRepo --skill officecli --skill grilling --skill orchestrator --skill officefile-reader --skill $Department" -ForegroundColor Yellow
+    $CommonSkills = @("officecli", "grilling", "orchestrator", "office-docx", "office-pdf", "office-pptx", "office-xlsx")
+    $skillArgs = @("-y", "skills@latest", "add", $SkillsRepo, "--agent", "opencode", "--global", "--copy", "--yes")
+    foreach ($skillName in $CommonSkills) { $skillArgs += @("--skill", $skillName) }
+    $skillArgs += @("--skill", $Department)
+    Write-Host "  [*] npx skills add $SkillsRepo --skill $($CommonSkills -join ' --skill ') --skill $Department" -ForegroundColor Yellow
     & npx @skillArgs
     if ($LASTEXITCODE -eq 0) {
-        Write-Host "  [OK] Installed: officecli + grilling + orchestrator + officefile-reader + $Department ($($Departments[$Department]))" -ForegroundColor Green
-        Write-Host "  [i] This machine has ONLY this department + common skills (officecli/grilling/orchestrator/officefile-reader)." -ForegroundColor Cyan
+        Write-Host "  [OK] Installed: $($CommonSkills -join ' + ') + $Department ($($Departments[$Department]))" -ForegroundColor Green
+        Write-Host "  [i] This machine has ONLY this department + common skills ($($CommonSkills -join '/'))." -ForegroundColor Cyan
         Write-Host "  [i] Update later:  npx -y skills@latest update --agent opencode --global" -ForegroundColor DarkGray
     } else {
         Write-Host "  [!] skills install failed (exit $LASTEXITCODE). Check network / repo access." -ForegroundColor Red
@@ -432,7 +427,7 @@ if (-not $Department) {
 # skills on this machine. When -CleanSkillsDir is given, remove the other phong-*
 # skills there, keeping only this machine's department. Opt-in and whitelisted:
 # only phong-* dirs that contain a SKILL.md, never the chosen department, never
-# common skills (officecli/setup/grilling/orchestrator/officefile-reader). -DryRun previews without deleting.
+# common skills (officecli/setup/grilling/orchestrator/office-*). -DryRun previews without deleting.
 if ($Department -and $CleanSkillsDir) {
     if (-not (Test-Path $CleanSkillsDir)) {
         Write-Host "  [!] -CleanSkillsDir not found: $CleanSkillsDir" -ForegroundColor Red
