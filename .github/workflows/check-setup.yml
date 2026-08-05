@@ -9,10 +9,7 @@ on:
 
 jobs:
   check-setup:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-2019, windows-latest]
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
