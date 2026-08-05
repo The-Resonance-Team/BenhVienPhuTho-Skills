@@ -37,6 +37,7 @@ jobs:
           Set-ExecutionPolicy -Scope Process RemoteSigned -Force
           $out = .\setup.ps1 -CheckOnly 2>&1
           $out | Out-Host
+          $out | Out-File -FilePath checkonly-output.txt -Encoding utf8
           @"
           ## setup.ps1 -CheckOnly (${{ matrix.os }})
 
@@ -44,3 +45,39 @@ jobs:
           $($out -join "`n")
           ``````
           "@ >> $env:GITHUB_STEP_SUMMARY
+
+      - name: Verify expected tools (new computer baseline)
+        shell: pwsh
+        run: |
+          $out = Get-Content checkonly-output.txt -Raw
+          $fail = $false
+
+          # Tools pre-installed on GitHub runners — must be detected
+          foreach ($tool in @("git","node","npm","python")) {
+            if ($out -match "\[OK\]\s+$tool") {
+              Write-Host "[PASS] $tool detected" -ForegroundColor Green
+            } else {
+              Write-Warning "[FAIL] $tool not detected — regression in detection logic"
+              $fail = $true
+            }
+          }
+
+          # Tools NOT expected on a fresh runner — should show "--"
+          foreach ($tool in @("officecli","opencode","pandoc","tesseract")) {
+            if ($out -match "\[OK\]\s+$tool") {
+              Write-Host "[INFO] $tool present (unexpected on fresh runner)" -ForegroundColor Yellow
+            } else {
+              Write-Host "[PASS] $tool not installed (expected on new computer)" -ForegroundColor Green
+            }
+          }
+
+          # Internet must be reachable
+          if ($out -match "Internet: OK") {
+            Write-Host "[PASS] Internet reachable" -ForegroundColor Green
+          } else {
+            Write-Warning "[FAIL] Internet unreachable — network probe broken or GitHub blocked"
+            $fail = $true
+          }
+
+          if ($fail) { exit 1 }
+          Write-Host "`nAll baseline checks passed."
