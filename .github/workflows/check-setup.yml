@@ -9,7 +9,10 @@ on:
 
 jobs:
   check-setup:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-2019, windows-latest]
     steps:
       - uses: actions/checkout@v4
 
@@ -32,16 +35,12 @@ jobs:
         shell: powershell
         run: |
           Set-ExecutionPolicy -Scope Process RemoteSigned -Force
-          .\setup.ps1 -CheckOnly 2>&1 | Tee-Object -Variable output
+          $out = .\setup.ps1 -CheckOnly 2>&1
+          $out | Out-Host
+          @"
+          ## setup.ps1 -CheckOnly (${{ matrix.os }})
 
-      - name: Summary
-        if: always()
-        shell: pwsh
-        run: |
-          $env:GITHUB_STEP_SUMMARY = @"
-          ## setup.ps1 -CheckOnly
-
-          `````
-          $output
-          `````
-          "@
+          ``````powershell
+          $($out -join "`n")
+          ``````
+          "@ >> $env:GITHUB_STEP_SUMMARY
