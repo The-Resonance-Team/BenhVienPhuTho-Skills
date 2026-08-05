@@ -33,14 +33,6 @@ AI đọc mô tả kỹ thuật (`description`) của từng skill và tự ch�
 
 **Lần đầu dùng máy mới:** gõ `/setup` hoặc "kiểm tra môi trường trước khi soạn văn bản" để AI tự kiểm tra `officecli` đã cài chưa (skill `setup`). Việc này chỉ cần làm 1 lần/máy — các lần sau AI tự nhận ra đã sẵn sàng và bỏ qua bước cài lại.
 
-**PowerShell chặn script lần đầu:** nếu gặp lỗi "not digitally signed" hoặc "cannot be loaded", chạy lệnh sau trong terminal (máy Windows):
-
-```powershell
-powershell -ExecutionPolicy Bypass -File .\setup.ps1 -CheckOnly
-```
-
-Script tự gỡ Zone-Identifier và đặt ExecutionPolicy cho các lần chạy tiếp — sau đó `.\setup.ps1` chạy trực tiếp.
-
 ---
 
 ## 2. Quy trình chung (áp dụng mọi phòng)
@@ -212,4 +204,3 @@ Ghi chú nội bộ, email, dàn ý trình bày, bản nháp chưa cần đúng 
 | Không chắc phòng ban nào phù hợp với yêu cầu | Cứ mô tả việc cần làm, AI tự xác định qua từ khóa nghiệp vụ; nếu nhầm, nói rõ tên phòng để AI chuyển đúng skill |
 | Máy chỉ thấy skill của phòng mình, không thấy skill phòng khác | **Đúng thiết kế.** Mỗi máy được IT cài đúng skill của phòng đó. Cần dùng skill phòng khác (ví dụ chuyển công tác) → báo IT cài lại. |
 | Không thấy skill nào của phòng mình | Báo IT — máy có thể chưa được cài skill phòng (bước chọn phòng khi cài đặt). |
-| PowerShell chặn `setup.ps1` ("not digitally signed" / "cannot be loaded") | Chạy `powershell -ExecutionPolicy Bypass -File .\setup.ps1 -CheckOnly` — script tự gỡ chặn, lần sau chạy trực tiếp được. Nguyên nhân: ExecutionPolicy mặc định = Restricted hoặc file từ OneDrive bị gắn Zone-Identifier. |
