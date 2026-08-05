@@ -67,12 +67,8 @@ jobs:
             }
           }
 
-          # --- Verify: internet reachable (info only — runner has network if it cloned the repo) ---
-          if ($out -match "Internet: OK") {
-            Write-Host "[PASS] Internet reachable" -ForegroundColor Green
-          } else {
-            Write-Host "[INFO] Internet probe skipped (runner has network)" -ForegroundColor Yellow
-          }
+          # Internet: skip assertion — runner has network (it cloned the repo)
+          Write-Host "[SKIP] Internet check (runner has network)" -ForegroundColor Yellow
 
           if ($fail) { exit 1 }
           Write-Host "`nAll baseline checks passed."

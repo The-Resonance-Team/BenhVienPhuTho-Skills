@@ -75,12 +75,15 @@ if ($CheckOnly) {
     }
     Write-Host "  [i] OpenWork: $(if (Test-OpenWorkInstalled) { 'installed' } else { 'not installed' })"
     try {
-        $result = Test-NetConnection -ComputerName api.github.com -Port 443 -WarningAction SilentlyContinue
-        if ($result.TcpTestSucceeded) {
+        $tcp = New-Object System.Net.Sockets.TcpClient
+        $result = $tcp.BeginConnect("api.github.com", 443, $null, $null)
+        $wait = $result.AsyncWaitHandle.WaitOne(3000, $false)
+        if ($wait -and $tcp.Connected) {
             Write-Host "  [i] Internet: OK" -ForegroundColor Green
         } else {
             Write-Host "  [!] Internet: UNREACHABLE (github.com / nodejs.org / python.org must be reachable)" -ForegroundColor Red
         }
+        $tcp.Close()
     } catch {
         Write-Host "  [!] Internet: UNREACHABLE (github.com / nodejs.org / python.org must be reachable)" -ForegroundColor Red
     }
