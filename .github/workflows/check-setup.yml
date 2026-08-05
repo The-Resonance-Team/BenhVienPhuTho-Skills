@@ -31,38 +31,34 @@ jobs:
           }
           Write-Host "Syntax OK"
 
-      - name: Run -CheckOnly
-        shell: powershell
+      - name: Run -CheckOnly and verify baseline
+        shell: pwsh
         run: |
           Set-ExecutionPolicy -Scope Process RemoteSigned -Force
           $out = .\setup.ps1 -CheckOnly 2>&1
           $out | Out-Host
-          $out | Out-File -FilePath checkonly-output.txt -Encoding utf8
-          @"
-          ## setup.ps1 -CheckOnly (${{ matrix.os }})
 
-          ``````powershell
-          $($out -join "`n")
-          ``````
-          "@ >> $env:GITHUB_STEP_SUMMARY
+          # Write summary
+          @(
+            "## setup.ps1 -CheckOnly (${{ matrix.os }})"
+            ""
+            "``````powershell"
+            ($out -join "`n")
+            "``````"
+          ) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
 
-      - name: Verify expected tools (new computer baseline)
-        shell: pwsh
-        run: |
-          $out = Get-Content checkonly-output.txt -Raw
+          # --- Verify: tools pre-installed on GitHub runners must be detected ---
           $fail = $false
-
-          # Tools pre-installed on GitHub runners — must be detected
           foreach ($tool in @("git","node","npm","python")) {
             if ($out -match "\[OK\]\s+$tool") {
               Write-Host "[PASS] $tool detected" -ForegroundColor Green
             } else {
-              Write-Warning "[FAIL] $tool not detected — regression in detection logic"
+              Write-Warning "[FAIL] $tool not detected"
               $fail = $true
             }
           }
 
-          # Tools NOT expected on a fresh runner — should show "--"
+          # --- Verify: tools NOT expected on fresh runner ---
           foreach ($tool in @("officecli","opencode","pandoc","tesseract")) {
             if ($out -match "\[OK\]\s+$tool") {
               Write-Host "[INFO] $tool present (unexpected on fresh runner)" -ForegroundColor Yellow
@@ -71,11 +67,11 @@ jobs:
             }
           }
 
-          # Internet must be reachable
+          # --- Verify: internet reachable ---
           if ($out -match "Internet: OK") {
             Write-Host "[PASS] Internet reachable" -ForegroundColor Green
           } else {
-            Write-Warning "[FAIL] Internet unreachable — network probe broken or GitHub blocked"
+            Write-Warning "[FAIL] Internet unreachable"
             $fail = $true
           }
 
