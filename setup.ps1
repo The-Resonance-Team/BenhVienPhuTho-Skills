@@ -7,8 +7,12 @@
     then installs department skills. Uses winget -> choco -> direct download fallback chain.
     Skill-only mode (-SkillOnly): skips tooling, only installs department skills via npx.
 .NOTES
-    Full:  .\setup.ps1 -Department phong-cntt
-    Skill: .\setup.ps1 -SkillOnly -Department phong-cntt
+    First run (if script is blocked by policy or OneDrive Zone-Identifier):
+      powershell -NoProfile -ExecutionPolicy Bypass -File .\setup.ps1 -CheckOnly
+    The script unblocks itself and sets execution policy on first run — subsequent calls work directly:
+      .\setup.ps1 -Department phong-cntt
+      .\setup.ps1 -SkillOnly -Department phong-cntt
+      .\setup.ps1 -CheckOnly
 #>
 
 param(
@@ -19,19 +23,26 @@ param(
     # Preview cleanup deletions without removing anything.
     [switch]$DryRun,
     # Skip tooling installation (Node, Python, OfficeCLI, OpenCode, OpenWork). Only install department skills.
-    [switch]$SkillOnly
+    [switch]$SkillOnly,
+    # Detect OS, package managers, tools, network — report and exit. No installs, no elevation.
+    [switch]$CheckOnly
 )
 
 $ErrorActionPreference = "Continue"
 
-# --- Auto-elevate to admin (skip in SkillOnly mode — no system installs needed) ---
-if (-not $SkillOnly -and -not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+# --- Self-bootstrap: unblock if OneDrive/Edge added Zone-Identifier, set policy for future runs ---
+Unblock-File $PSCommandPath -ErrorAction SilentlyContinue
+try { Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force -ErrorAction SilentlyContinue } catch { }
+
+# --- Auto-elevate to admin (skip in SkillOnly/CheckOnly mode — no system installs needed) ---
+if (-not $SkillOnly -and -not $CheckOnly -and -not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "[*] Requesting admin privileges..." -ForegroundColor Yellow
     $fwd = "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`""
     if ($Department)     { $fwd += " -Department `"$Department`"" }
     if ($CleanSkillsDir) { $fwd += " -CleanSkillsDir `"$CleanSkillsDir`"" }
     if ($DryRun)         { $fwd += " -DryRun" }
     if ($SkillOnly)      { $fwd += " -SkillOnly" }
+    if ($CheckOnly)      { $fwd += " -CheckOnly" }
     Start-Process powershell -Verb RunAs -ArgumentList $fwd
     exit
 }
@@ -44,6 +55,34 @@ if (-not $SkillOnly -and -not ([Security.Principal.WindowsPrincipal][Security.Pr
 function Test-CommandExists {
     param([string]$Command)
     $null -ne (Get-Command $Command -ErrorAction SilentlyContinue)
+}
+
+# --- Helper: OpenWork present in any uninstall registry hive ---
+function Test-OpenWorkInstalled {
+    $null -ne (Get-ItemProperty @(
+        "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
+        "HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*",
+        "HKLM:\Software\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*"
+    ) -ErrorAction SilentlyContinue | Where-Object { $_.DisplayName -like "*OpenWork*" })
+}
+
+# --- CheckOnly mode: report what this machine has, then exit ---
+if ($CheckOnly) {
+    Write-Host "`n[CHECK] Environment report:" -ForegroundColor Cyan
+    Write-Host "  [i] OS: $([System.Environment]::OSVersion.VersionString) | $env:PROCESSOR_ARCHITECTURE"
+    foreach ($tool in @("winget","choco","git","node","npm","python","pip","pandoc","tesseract","officecli","opencode")) {
+        Write-Host ("  [{0}] {1}" -f $(if (Test-CommandExists $tool) { "OK " } else { "-- " }), $tool)
+    }
+    Write-Host "  [i] OpenWork: $(if (Test-OpenWorkInstalled) { 'installed' } else { 'not installed' })"
+    try {
+        $req = [System.Net.HttpWebRequest]::Create("https://api.github.com/rate_limit")
+        $req.Timeout = 5000
+        $req.GetResponse().Close()
+        Write-Host "  [i] Internet: OK" -ForegroundColor Green
+    } catch {
+        Write-Host "  [!] Internet: UNREACHABLE (github.com / nodejs.org / python.org must be reachable)" -ForegroundColor Red
+    }
+    exit 0
 }
 
 if ($SkillOnly) {
@@ -319,29 +358,39 @@ if (Test-CommandExists "opencode") {
 # [6/8] OpenWork (Desktop App)
 # ==========================================
 Write-Host "`n[6/8] Checking OpenWork..." -ForegroundColor Cyan
-$openworkInstalled = Get-ItemProperty "HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\*" -ErrorAction SilentlyContinue |
-    Where-Object { $_.DisplayName -like "*OpenWork*" }
+$openworkInstalled = Test-OpenWorkInstalled
 if ($openworkInstalled) {
     Write-Host "  [SKIP] OpenWork already installed" -ForegroundColor DarkGray
 } else {
-    try {
-        Write-Host "  [*] Fetching latest OpenWork release info..." -ForegroundColor Yellow
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $release = Invoke-RestMethod -Uri "https://api.github.com/repos/different-ai/openwork/releases/latest" -Headers @{ "User-Agent" = "BVPT-Setup-Script" }
-        $asset = $release.assets | Where-Object { $_.name -like "openwork-win-x64-*.exe" } | Select-Object -First 1
-        if (-not $asset) {
-            throw "No win-x64 .exe asset found in latest release ($($release.tag_name))"
+    # Primary: winget picks the latest version + arch + silent NSIS install + SHA256 check.
+    $installed = Install-Winget -Id "DifferentAI.OpenWork" -Name "OpenWork"
+    if (-not $installed) {
+        # Fallback (no winget / ARM64): direct download from the latest GitHub release.
+        try {
+            Write-Host "  [*] Fetching latest OpenWork release info..." -ForegroundColor Yellow
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $release = Invoke-RestMethod -Uri "https://api.github.com/repos/different-ai/openwork/releases/latest" -Headers @{ "User-Agent" = "BVPT-Setup-Script" }
+            $arch = if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") { "arm64" } else { "x64" }
+            $asset = $release.assets | Where-Object { $_.name -like "openwork-win-$arch-*.exe" } | Select-Object -First 1
+            if (-not $asset) {
+                throw "No win-$arch .exe asset found in latest release ($($release.tag_name))"
+            }
+            $owPath = "$env:TEMP\$($asset.name)"
+            Write-Host "  [*] Latest version: $($release.tag_name)" -ForegroundColor Yellow
+            if (Get-File -Url $asset.browser_download_url -Out $owPath) {
+                Unblock-File $owPath   # installer is unsigned (per release notes); drop MOTW so SmartScreen does not block
+                Write-Host "  [*] Installing OpenWork $($release.tag_name)..." -ForegroundColor Yellow
+                Start-Process $owPath -ArgumentList "/S" -Wait -NoNewWindow   # /S = silent (NSIS)
+                Remove-Item $owPath -ErrorAction SilentlyContinue
+                if (Test-OpenWorkInstalled) {
+                    Write-Host "  [OK] OpenWork $($release.tag_name) installed" -ForegroundColor Green
+                } else {
+                    Write-Host "  [!] OpenWork install may have failed. Re-run or download from: https://github.com/different-ai/openwork/releases/latest" -ForegroundColor Red
+                }
+            }
+        } catch {
+            Write-Host "  [!] OpenWork install failed: $_. Download manually from: https://github.com/different-ai/openwork/releases/latest" -ForegroundColor Red
         }
-        $owPath = "$env:TEMP\$($asset.name)"
-        Write-Host "  [*] Latest version: $($release.tag_name)" -ForegroundColor Yellow
-        if (Get-File -Url $asset.browser_download_url -Out $owPath) {
-            Write-Host "  [*] Installing OpenWork $($release.tag_name)..." -ForegroundColor Yellow
-            Start-Process $owPath -Wait -NoNewWindow
-            Remove-Item $owPath -ErrorAction SilentlyContinue
-            Write-Host "  [OK] OpenWork $($release.tag_name) installed" -ForegroundColor Green
-        }
-    } catch {
-        Write-Host "  [!] OpenWork install failed: $_. Download manually from: https://github.com/different-ai/openwork/releases/latest" -ForegroundColor Red
     }
 }
 
