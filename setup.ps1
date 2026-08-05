@@ -30,13 +30,6 @@ param(
 
 $ErrorActionPreference = "Continue"
 
-# --- Self-bootstrap: unblock if OneDrive/Edge added Zone-Identifier, set policy for future runs ---
-# Skip in CI — Set-ExecutionPolicy hangs on some runners
-if (-not $env:CI) {
-    Unblock-File $PSCommandPath -ErrorAction SilentlyContinue
-    try { Set-ExecutionPolicy -Scope CurrentUser RemoteSigned -Force -ErrorAction SilentlyContinue } catch { }
-}
-
 # --- Auto-elevate to admin (skip in SkillOnly/CheckOnly mode — no system installs needed) ---
 if (-not $SkillOnly -and -not $CheckOnly -and -not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Write-Host "[*] Requesting admin privileges..." -ForegroundColor Yellow
