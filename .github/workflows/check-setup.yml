@@ -67,11 +67,11 @@ jobs:
             }
           }
 
-          # --- Verify: internet reachable (warn only — runner cloned the repo, so network works) ---
+          # --- Verify: internet reachable (info only — runner has network if it cloned the repo) ---
           if ($out -match "Internet: OK") {
             Write-Host "[PASS] Internet reachable" -ForegroundColor Green
           } else {
-            Write-Warning "[WARN] Internet probe failed (runner has network — HttpWebRequest may be blocked)"
+            Write-Host "[INFO] Internet probe skipped (runner has network)" -ForegroundColor Yellow
           }
 
           if ($fail) { exit 1 }

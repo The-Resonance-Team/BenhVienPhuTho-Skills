@@ -75,8 +75,12 @@ if ($CheckOnly) {
     }
     Write-Host "  [i] OpenWork: $(if (Test-OpenWorkInstalled) { 'installed' } else { 'not installed' })"
     try {
-        $req = Invoke-WebRequest -Uri "https://api.github.com/rate_limit" -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
-        Write-Host "  [i] Internet: OK" -ForegroundColor Green
+        $result = Test-NetConnection -ComputerName api.github.com -Port 443 -WarningAction SilentlyContinue
+        if ($result.TcpTestSucceeded) {
+            Write-Host "  [i] Internet: OK" -ForegroundColor Green
+        } else {
+            Write-Host "  [!] Internet: UNREACHABLE (github.com / nodejs.org / python.org must be reachable)" -ForegroundColor Red
+        }
     } catch {
         Write-Host "  [!] Internet: UNREACHABLE (github.com / nodejs.org / python.org must be reachable)" -ForegroundColor Red
     }
