@@ -35,7 +35,7 @@ jobs:
         shell: pwsh
         run: |
           Set-ExecutionPolicy -Scope Process RemoteSigned -Force
-          $out = .\setup.ps1 -CheckOnly 2>&1
+          $out = .\setup.ps1 -CheckOnly *>&1
           $out | Out-Host
 
           # Write summary
