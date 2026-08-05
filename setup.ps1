@@ -75,9 +75,7 @@ if ($CheckOnly) {
     }
     Write-Host "  [i] OpenWork: $(if (Test-OpenWorkInstalled) { 'installed' } else { 'not installed' })"
     try {
-        $req = [System.Net.HttpWebRequest]::Create("https://api.github.com/rate_limit")
-        $req.Timeout = 5000
-        $req.GetResponse().Close()
+        $req = Invoke-WebRequest -Uri "https://api.github.com/rate_limit" -UseBasicParsing -TimeoutSec 5 -ErrorAction Stop
         Write-Host "  [i] Internet: OK" -ForegroundColor Green
     } catch {
         Write-Host "  [!] Internet: UNREACHABLE (github.com / nodejs.org / python.org must be reachable)" -ForegroundColor Red
