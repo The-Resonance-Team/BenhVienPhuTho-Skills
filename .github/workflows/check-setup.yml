@@ -1,0 +1,72 @@
+name: Check setup.ps1
+
+on:
+  push:
+    paths: [setup.ps1]
+  pull_request:
+    paths: [setup.ps1]
+  workflow_dispatch:
+
+jobs:
+  check-setup:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check
+        shell: pwsh
+        run: |
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path setup.ps1).Path,
+            [ref]$null,
+            [ref]$errors
+          ) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_ }
+            exit 1
+          }
+          Write-Host "Syntax OK"
+
+      - name: Run -CheckOnly and verify baseline
+        shell: pwsh
+        timeout-minutes: 3
+        run: |
+          Set-ExecutionPolicy -Scope Process RemoteSigned -Force
+          $out = .\setup.ps1 -CheckOnly *>&1
+          $out | Out-Host
+
+          # Write summary
+          @(
+            "## setup.ps1 -CheckOnly (${{ matrix.os }})"
+            ""
+            "``````powershell"
+            ($out -join "`n")
+            "``````"
+          ) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+
+          # --- Verify: tools pre-installed on GitHub runners must be detected ---
+          $fail = $false
+          foreach ($tool in @("git","node","npm","python")) {
+            if ($out -match "\[OK\s*\]\s+$tool") {
+              Write-Host "[PASS] $tool detected" -ForegroundColor Green
+            } else {
+              Write-Warning "[FAIL] $tool not detected"
+              $fail = $true
+            }
+          }
+
+          # --- Verify: tools NOT expected on fresh runner ---
+          foreach ($tool in @("officecli","opencode","pandoc","tesseract")) {
+            if ($out -match "\[OK\s*\]\s+$tool") {
+              Write-Host "[INFO] $tool present (unexpected on fresh runner)" -ForegroundColor Yellow
+            } else {
+              Write-Host "[PASS] $tool not installed (expected on new computer)" -ForegroundColor Green
+            }
+          }
+
+          # Internet: skip assertion — runner has network (it cloned the repo)
+          Write-Host "[SKIP] Internet check (runner has network)" -ForegroundColor Yellow
+
+          if ($fail) { exit 1 }
+          Write-Host "`nAll baseline checks passed."
